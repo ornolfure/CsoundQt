@@ -213,15 +213,18 @@ int CsoundHtmlWrapper::perform() {
 
 int CsoundHtmlWrapper::perform_thread_routine() {
     qDebug() ;
-    int result = 0;
-    result = csoundStart(csound);
-    message("Csound has started running...");
+    int result = csoundStart(csound);
+    message("Csound has started running...\n");
+    qDebug("Csound has started: result: %d", result);
+    int kperiods = 0;
     for (csound_stop = false, csound_finished = false;
          ((csound_stop == false) && (csound_finished == false) && (csound != nullptr)); )
     {
         csound_finished = csoundPerformKsmps(csound);
+        kperiods++;
     }
-    message("Csound has stopped running.");
+    message("Csound has stopped running.\n");
+    qDebug("Csound has stopped: kperiods: %d csound_stop: %d csound_finished: %d csound: %p", kperiods, csound_stop, csound_finished, csound);
     // Although the thread has been started by the CsoundHtmlWrapper,
     // the cleanup should be done by the CsoundEngine.
     // result = csoundCleanup(csound);
