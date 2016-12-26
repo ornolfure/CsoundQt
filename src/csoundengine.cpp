@@ -506,7 +506,7 @@ void CsoundEngine::writeWidgetValues(CsoundUserData *ud)
 				&& csoundGetChannelPtr(ud->csound, &pvalue,
 									   ud->outputStringChannelNames[i].toLocal8Bit().constData(),
 									   CSOUND_OUTPUT_CHANNEL | CSOUND_STRING_CHANNEL) == 0) {
-            char chanString[128];
+			char chanString[2048]; // large enough for long strings in displays
             csoundGetStringChannel(ud->csound, ud->outputStringChannelNames[i].toLocal8Bit().constData(),
                                                    chanString);
             if(ud->previousStringOutputValues[i] != QString(chanString)) {
@@ -884,6 +884,7 @@ int CsoundEngine::runCsound()
     // Do not run the performance thread if the piece is an HTML file,
     // the HTML code must do that.
     if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) {
+        qDebug() << "Early return witout compiling because this is an .html piece.";
         return 0;
     }
 #if CS_APIVERSION>=4

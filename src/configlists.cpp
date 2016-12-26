@@ -28,7 +28,7 @@
 #include <QApplication>
 #include <QDebug>
 
-#include "csound.h"
+#include <csound.h>
 #include "configlists.h"
 
 ConfigLists::ConfigLists()
