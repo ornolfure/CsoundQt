@@ -26,14 +26,25 @@
 #include <QObject>
 #include <QDebug>
 #include <thread>
+#include <vector>
+#if defined(_MSC_VER)
+#include <concurrent_queue.h>
+#else
+#include <boost/lockfree/queue.hpp>
+#endif
 #include "csoundengine.h"
 
+struct ScoreEvent {
+    char opcode;
+    std::vector<MYFLT> pfields;
+};
 
 class CsoundHtmlWrapper : public QObject
 {
     Q_OBJECT
 public:
 	explicit CsoundHtmlWrapper(QObject *parent = 0);
+    virtual ~CsoundHtmlWrapper();
 	void setCsoundEngine(CsoundEngine *csEngine); // necessay to get CsoundEngine::isPlaying()
 	Q_INVOKABLE int compileCsd(const QString &filename);
 	Q_INVOKABLE int compileCsdText(const QString &text);
@@ -84,6 +95,13 @@ private:
     CSOUND *csound;
     CsoundEngine *m_csoundEngine;
     std::thread *csound_thread;
+#if defined(_MSC_VER)
+    concurrency::concurrent_queue<char *> csound_score_queue;
+    concurrency::concurrent_queue<ScoreEvent *> csound_event_queue;
+#else
+    boost::lockfree::queue<char *, boost::lockfree::fixed_sized<false> > *csound_score_queue;
+    boost::lockfree::queue<ScoreEvent *, boost::lockfree::fixed_sized<false> > *csound_event_queue;
+#endif
     QObject *message_callback;
 signals:
 	//void stateChanged(int state);

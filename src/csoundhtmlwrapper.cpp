@@ -34,8 +34,47 @@ CsoundHtmlWrapper::CsoundHtmlWrapper(QObject *parent) :
     csound_thread(nullptr),
     csound(nullptr),
     m_csoundEngine(nullptr),
+#if !defined(_MSC_VER)
+    csound_score_queue(0),
+    csound_event_queue(0),
+#endif
     message_callback(nullptr)
 {
+#if !defined(_MSC_VER)
+    csound_score_queue = new boost::lockfree::queue<char *, boost::lockfree::fixed_sized<false> >(0);
+    csound_event_queue= new boost::lockfree::queue<ScoreEvent *, boost::lockfree::fixed_sized<false> >(0);
+#endif
+}
+
+CsoundHtmlWrapper::~CsoundHtmlWrapper() {
+    ScoreEvent *event = 0;
+    char *score_text = 0;
+#if defined(_MSC_VER)
+    while (csound_event_queue.try_pop(event)) {
+#else
+    while (csound_event_queue->pop(event)) {
+#endif
+        delete event;
+    }
+#if defined(_MSC_VER)
+    while (csound_score_queue.try_pop(score_text)) {
+#else
+    while (csound_score_queue->pop(score_text)) {
+#endif
+        free(score_text);
+    }
+#if !defined(_MSC_VER)
+    if (csound_score_queue) {
+        delete csound_score_queue;
+        csound_score_queue = 0;
+
+    }
+    if (csound_event_queue) {
+        delete csound_event_queue;
+        csound_event_queue = 0;
+
+    }
+#endif
 }
 
 void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine)
@@ -215,6 +254,8 @@ int CsoundHtmlWrapper::perform_thread_routine() {
     int result = 0;
     message("Csound has started running...\n");
     qDebug("Csound has started: result: %d", result);
+    ScoreEvent *event = 0;
+    char *score_text = 0;
     int kperiods = 0;
     csound_stop = false;
     csound_finished = 0;
@@ -222,22 +263,48 @@ int CsoundHtmlWrapper::perform_thread_routine() {
         if (csound_stop == true) {
             break;
         }
+#if defined(_MSC_VER)
+        while (csound_event_queue.try_pop(event)) {
+#else
+        while (csound_event_queue->pop(event)) {
+#endif
+            csoundScoreEvent(csound, event->opcode, event->pfields.data(), event->pfields.size());
+            delete event;
+        }
+#if defined(_MSC_VER)
+        while (csound_score_queue.try_pop(score_text)) {
+#else
+        while (csound_score_queue->pop(score_text)) {
+#endif
+            csoundReadScore(csound, score_text);
+            free(score_text);
+        }
         csound_finished = csoundPerformKsmps(csound);
-        kperiods++;
         if (csound_finished != 0) {
             break;
         }
     }
     message("Csound has stopped running.\n");
     qDebug("Csound has stopped: kperiods: %d csound_stop: %d csound_finished: %d csound: %p", kperiods, csound_stop, csound_finished, csound);
+#if defined(_MSC_VER)
+    while (csound_event_queue.try_pop(event)) {
+#else
+    while (csound_event_queue->pop(event)) {
+#endif
+        delete event;
+    }
+#if defined(_MSC_VER)
+    while (csound_score_queue.try_pop(score_text)) {
+#else
+    while (csound_score_queue->pop(score_text)) {
+#endif
+        free(score_text);
+    }
     // Although the thread has been started by the CsoundHtmlWrapper,
-    // the cleanup should be done by the CsoundEngine.
-    // result = csoundCleanup(csound);
-    // if (result) {
-    //     message("Failed to clean up Csound performance.");
-    // }
-    // csoundReset(csound);
-    return 0;
+    // this cleanup should be done by the CsoundEngine.
+    // result = csoundCleanup(csound_);
+    // csoundReset(csound_);
+    return csound_finished;
 }
 
 
@@ -245,7 +312,12 @@ int CsoundHtmlWrapper::readScore(const QString &text) {
     if (!csound) {
         return -1;
     }
-    return csoundReadScore(csound, text.toLocal8Bit());
+#if defined(_MSC_VER)
+    csound_score_queue.push(strdup(text.toLocal8Bit()));
+#else
+    csound_score_queue->push(strdup(text.toLocal8Bit()));
+#endif
+    return 0;
 }
 
 void CsoundHtmlWrapper::reset() {
@@ -269,11 +341,21 @@ int CsoundHtmlWrapper::runUtility(const QString &command, int argc, char **argv)
     return csoundRunUtility(csound, command.toLocal8Bit(), argc, argv); // probably does not work from JS due char **
 }
 
-int CsoundHtmlWrapper::scoreEvent(char type, const double *pFields, long numFields) {
+int CsoundHtmlWrapper::scoreEvent(char opcode, const double *pfields, long field_count) {
     if (!csound) {
         return -1;
     }
-    return csoundScoreEvent(csound,type, pFields, numFields);
+    ScoreEvent *event = new ScoreEvent;
+    event->opcode = opcode;
+    for(int i = 0; i < field_count; i++) {
+        event->pfields.push_back(pfields[i]);
+    }
+#if defined(_MSC_VER)
+    csound_event_queue.push(event);
+#else
+    csound_event_queue->push(event);
+#endif
+    return 0;
 }
 
 void CsoundHtmlWrapper::setControlChannel(const QString &name, double value) {
