@@ -202,7 +202,6 @@ int CsoundHtmlWrapper::perform() {
     if (!csound) {
         return -1;
     }
-    //stop();
     csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
     if (csound_thread) {
         return 0;
@@ -217,11 +216,17 @@ int CsoundHtmlWrapper::perform_thread_routine() {
     message("Csound has started running...\n");
     qDebug("Csound has started: result: %d", result);
     int kperiods = 0;
-    for (csound_stop = false, csound_finished = false;
-         ((csound_stop == false) && (csound_finished == false) && (csound != nullptr)); )
-    {
+    csound_stop = false;
+    csound_finished = 0;
+    while (true) {
+        if (csound_stop == true) {
+            break;
+        }
         csound_finished = csoundPerformKsmps(csound);
         kperiods++;
+        if (csound_finished != 0) {
+            break;
+        }
     }
     message("Csound has stopped running.\n");
     qDebug("Csound has stopped: kperiods: %d csound_stop: %d csound_finished: %d csound: %p", kperiods, csound_stop, csound_finished, csound);

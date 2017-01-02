@@ -56,7 +56,7 @@ public:
 	Q_INVOKABLE bool isPlaying();
 	Q_INVOKABLE int isScorePending();
 	Q_INVOKABLE void message(const QString &text);
-	Q_INVOKABLE int perform();
+    Q_INVOKABLE int perform();
     Q_INVOKABLE int perform_thread_routine();
     Q_INVOKABLE int readScore(const QString &text);
     Q_INVOKABLE void reset();
@@ -80,7 +80,7 @@ public:
 	Q_INVOKABLE void tableSet(int table_number, int index, double value);
 private:
     bool csound_stop;
-    bool csound_finished;
+    int csound_finished;
     CSOUND *csound;
     CsoundEngine *m_csoundEngine;
     std::thread *csound_thread;
