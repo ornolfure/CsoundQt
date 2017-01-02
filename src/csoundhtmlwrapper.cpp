@@ -204,7 +204,7 @@ int CsoundHtmlWrapper::perform() {
     if (!csound) {
         return -1;
     }
-    stop();
+    //stop();
     csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
     if (csound_thread) {
         return 0;
@@ -215,8 +215,6 @@ int CsoundHtmlWrapper::perform() {
 
 int CsoundHtmlWrapper::perform_thread_routine() {
     qDebug() << "CsoundHtmlWrapper: " << __FUNCTION__;
-    int result = 0;
-    result = csoundStart(csound);
     message("Csound is running...");
     for (csound_stop = false, csound_finished = false;
          ((csound_stop == false) && (csound_finished == false) && (csound != nullptr)); )
@@ -231,7 +229,7 @@ int CsoundHtmlWrapper::perform_thread_routine() {
     //     message("Failed to clean up Csound performance.");
     // }
     // csoundReset(csound);
-    return result;
+    return 0;
 }
 
 
@@ -334,6 +332,15 @@ void CsoundHtmlWrapper::setStringChannel(const QString &name, const QString &val
         return;
     }
     csoundSetStringChannel(csound,  name.toLocal8Bit(), value.toLocal8Bit().data());
+}
+
+int CsoundHtmlWrapper::start(){
+    int result = 0;
+    if (!csound) {
+        return -1;
+    }
+    result = csoundStart(csound);
+    return result;
 }
 
 void CsoundHtmlWrapper::stop(){

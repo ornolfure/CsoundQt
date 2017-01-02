@@ -72,6 +72,7 @@ public:
 	Q_INVOKABLE void setScoreOffsetSeconds(double value);
 	Q_INVOKABLE void setScorePending(bool value);
 	Q_INVOKABLE void setStringChannel(const QString &name, const QString &value);
+    Q_INVOKABLE int start();
     Q_INVOKABLE void stop();
     Q_INVOKABLE double tableGet(int table_number, int index);
 	Q_INVOKABLE int tableLength(int table_number);
