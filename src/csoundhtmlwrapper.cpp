@@ -27,8 +27,6 @@
 #include <QApplication>
 #include <QDebug>
 
-
-
 CsoundHtmlWrapper::CsoundHtmlWrapper(QObject *parent) :
     QObject(parent),
     csound_stop(true),
@@ -214,14 +212,19 @@ int CsoundHtmlWrapper::perform() {
 }
 
 int CsoundHtmlWrapper::perform_thread_routine() {
-    qDebug() << "CsoundHtmlWrapper: " << __FUNCTION__;
-    message("Csound is running...");
+    qDebug() ;
+    int result = 0;
+    message("Csound has started running...\n");
+    qDebug("Csound has started: result: %d", result);
+    int kperiods = 0;
     for (csound_stop = false, csound_finished = false;
          ((csound_stop == false) && (csound_finished == false) && (csound != nullptr)); )
     {
         csound_finished = csoundPerformKsmps(csound);
+        kperiods++;
     }
-    message("Csound has stopped.");
+    message("Csound has stopped running.\n");
+    qDebug("Csound has stopped: kperiods: %d csound_stop: %d csound_finished: %d csound: %p", kperiods, csound_stop, csound_finished, csound);
     // Although the thread has been started by the CsoundHtmlWrapper,
     // the cleanup should be done by the CsoundEngine.
     // result = csoundCleanup(csound);
@@ -238,6 +241,13 @@ int CsoundHtmlWrapper::readScore(const QString &text) {
         return -1;
     }
     return csoundReadScore(csound, text.toLocal8Bit());
+}
+
+void CsoundHtmlWrapper::reset() {
+    if (!csound) {
+        return;
+    }
+    csoundReset(csound);
 }
 
 void CsoundHtmlWrapper::rewindScore() {
@@ -287,7 +297,7 @@ void CsoundHtmlWrapper::setInput(const QString &name){
 }
 
 void CsoundHtmlWrapper::setMessageCallback(QObject *callback){
-    qDebug() << "CsoundHtmlWrapper::setMessageCallback";
+    qDebug();
     callback->dumpObjectInfo();
 }
 
