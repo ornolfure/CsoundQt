@@ -26,12 +26,7 @@
 #include <QObject>
 #include <QDebug>
 #include <thread>
-#include <vector>
-#if defined(_MSC_VER)
-#include <concurrent_queue.h>
-#else
-#include <boost/lockfree/queue.hpp>
-#endif
+#include "concurrent_queue.h"
 #include "csoundengine.h"
 
 struct ScoreEvent {
@@ -95,13 +90,8 @@ private:
     CSOUND *csound;
     CsoundEngine *m_csoundEngine;
     std::thread *csound_thread;
-#if defined(_MSC_VER)
-    concurrency::concurrent_queue<char *> csound_score_queue;
-    concurrency::concurrent_queue<ScoreEvent *> csound_event_queue;
-#else
-    boost::lockfree::queue<char *, boost::lockfree::fixed_sized<false> > *csound_score_queue;
-    boost::lockfree::queue<ScoreEvent *, boost::lockfree::fixed_sized<false> > *csound_event_queue;
-#endif
+    moodycamel::ConcurrentQueue<char *> csound_score_queue;
+    moodycamel::ConcurrentQueue<ScoreEvent *> csound_event_queue;
     QObject *message_callback;
 signals:
 	//void stateChanged(int state);

@@ -14,7 +14,15 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy o    ScoreEvent *event = 0;
+    while (!csound_event_queue.try_dequeue(event)) {
+        delete event;
+    }
+    char *score_text = 0;
+    while (!csound_score_queue.try_dequeue(score_text)) {
+        free(score_text);
+    }
+f the GNU Lesser General Public
     License along with Csound; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
     02111-1307 USA
@@ -34,47 +42,19 @@ CsoundHtmlWrapper::CsoundHtmlWrapper(QObject *parent) :
     csound_thread(nullptr),
     csound(nullptr),
     m_csoundEngine(nullptr),
-#if !defined(_MSC_VER)
-    csound_score_queue(0),
-    csound_event_queue(0),
-#endif
     message_callback(nullptr)
 {
-#if !defined(_MSC_VER)
-    csound_score_queue = new boost::lockfree::queue<char *, boost::lockfree::fixed_sized<false> >(0);
-    csound_event_queue= new boost::lockfree::queue<ScoreEvent *, boost::lockfree::fixed_sized<false> >(0);
-#endif
 }
 
 CsoundHtmlWrapper::~CsoundHtmlWrapper() {
     ScoreEvent *event = 0;
-    char *score_text = 0;
-#if defined(_MSC_VER)
-    while (csound_event_queue.try_pop(event)) {
-#else
-    while (csound_event_queue->pop(event)) {
-#endif
+    while (csound_event_queue.try_dequeue(event)) {
         delete event;
     }
-#if defined(_MSC_VER)
-    while (csound_score_queue.try_pop(score_text)) {
-#else
-    while (csound_score_queue->pop(score_text)) {
-#endif
+    char *score_text = 0;
+    while (csound_score_queue.try_dequeue(score_text)) {
         free(score_text);
     }
-#if !defined(_MSC_VER)
-    if (csound_score_queue) {
-        delete csound_score_queue;
-        csound_score_queue = 0;
-
-    }
-    if (csound_event_queue) {
-        delete csound_event_queue;
-        csound_event_queue = 0;
-
-    }
-#endif
 }
 
 void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine)
@@ -263,19 +243,11 @@ int CsoundHtmlWrapper::perform_thread_routine() {
         if (csound_stop == true) {
             break;
         }
-#if defined(_MSC_VER)
-        while (csound_event_queue.try_pop(event)) {
-#else
-        while (csound_event_queue->pop(event)) {
-#endif
+        while (csound_event_queue.try_dequeue(event)) {
             csoundScoreEvent(csound, event->opcode, event->pfields.data(), event->pfields.size());
             delete event;
         }
-#if defined(_MSC_VER)
-        while (csound_score_queue.try_pop(score_text)) {
-#else
-        while (csound_score_queue->pop(score_text)) {
-#endif
+        while (csound_score_queue.try_dequeue(score_text)) {
             csoundReadScore(csound, score_text);
             free(score_text);
         }
@@ -286,18 +258,10 @@ int CsoundHtmlWrapper::perform_thread_routine() {
     }
     message("Csound has stopped running.\n");
     qDebug("Csound has stopped: kperiods: %d csound_stop: %d csound_finished: %d csound: %p", kperiods, csound_stop, csound_finished, csound);
-#if defined(_MSC_VER)
-    while (csound_event_queue.try_pop(event)) {
-#else
-    while (csound_event_queue->pop(event)) {
-#endif
+    while (csound_event_queue.try_dequeue(event)) {
         delete event;
     }
-#if defined(_MSC_VER)
-    while (csound_score_queue.try_pop(score_text)) {
-#else
-    while (csound_score_queue->pop(score_text)) {
-#endif
+    while (csound_score_queue.try_dequeue(score_text)) {
         free(score_text);
     }
     // Although the thread has been started by the CsoundHtmlWrapper,
@@ -312,11 +276,7 @@ int CsoundHtmlWrapper::readScore(const QString &text) {
     if (!csound) {
         return -1;
     }
-#if defined(_MSC_VER)
-    csound_score_queue.push(strdup(text.toLocal8Bit()));
-#else
-    csound_score_queue->push(strdup(text.toLocal8Bit()));
-#endif
+    csound_score_queue.enqueue(strdup(text.toLocal8Bit()));
     return 0;
 }
 
@@ -350,11 +310,7 @@ int CsoundHtmlWrapper::scoreEvent(char opcode, const double *pfields, long field
     for(int i = 0; i < field_count; i++) {
         event->pfields.push_back(pfields[i]);
     }
-#if defined(_MSC_VER)
-    csound_event_queue.push(event);
-#else
-    csound_event_queue->push(event);
-#endif
+    csound_event_queue.enqueue(event);
     return 0;
 }
 
