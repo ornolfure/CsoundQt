@@ -79,6 +79,7 @@ HEADERS = "src/about.h" \
     src/debugpanel.h \
     src/livecodeeditor.h \
     src/newbreakpointdialog.h \
+    $$PWD/concurrent_queue.h
 
 SOURCES = "src/about.cpp" \
     "src/configdialog.cpp" \

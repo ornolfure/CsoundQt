@@ -1315,7 +1315,7 @@ void CsoundEngine::addBreakpoint(int line, int instr, int skip)
 
 void CsoundEngine::removeBreakpoint(int line, int instr)
 {
-    if (isRunning() && m_debugging) {>>>
+    if (isRunning() && m_debugging) {
 		csoundRemoveBreakpoint(ud->csound, line, instr);
 	}
 }
