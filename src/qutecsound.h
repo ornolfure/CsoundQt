@@ -69,7 +69,7 @@ class EventSheet;
 class CsoundEngine;
 class MidiHandler;
 class MidiLearnDialog;
-#if defined(QCS_HTML5) || defined(QCS_QTHTML)
+#if defined(QCS_QTHTML)
 class CsoundHtmlView;
 #endif
 
@@ -145,7 +145,7 @@ public:
 	void stkCheck();
 	// localServer
 	bool startServer();
-#if defined(QCS_HTML5) || defined(QCS_QTHTML)
+#if defined(QCS_QTHTML)
 	void updateHtmlView();
 #endif
 public slots:
@@ -223,7 +223,9 @@ private slots:
 	void setHelpEntry();
     void setFullScreen(bool full);
     void setEditorFullScreen(bool full);
+#if defined(QCS_QTHTML)
     void setHtmlFullScreen(bool full);
+#endif
     void setHelpFullScreen(bool full);
     void setWidgetsFullScreen(bool full);
     void showDebugger(bool show);
@@ -330,7 +332,7 @@ private:
 	QQuickWidget *m_virtualKeyboard, *m_tableEditor;
 	QPointer <QQuickWidget> m_virtualKeyboardPointer, m_tableEditorPointer; // to control, if the object is deleted
 #endif
-#if defined(QCS_HTML5) || defined(QCS_QTHTML)
+#if defined(QCS_QTHTML)
 public: CsoundHtmlView *csoundHtmlView;
 #endif
 private:
@@ -419,7 +421,7 @@ private:
 #endif
 	QAction *showVirtualKeyboardAct;
 	QAction *showTableEditorAct;
-#if defined(QCS_HTML5) || defined(QCS_QTHTML)
+#if defined(QCS_QTHTML)
 	QAction *showHtml5Act;
 #endif
 	QAction *midiLearnAct;
