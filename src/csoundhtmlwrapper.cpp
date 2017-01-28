@@ -37,163 +37,152 @@ f the GNU Lesser General Public
 
 CsoundHtmlWrapper::CsoundHtmlWrapper(QObject *parent) :
     QObject(parent),
-    csound_stop(true),
-    csound_finished(true),
-    csound(nullptr),
     m_csoundEngine(nullptr),
-    csound_thread(nullptr),
-    message_callback(nullptr)
+    message_callback(nullptr),
+    csound((CSOUND *)nullptr)
 {
 }
 
 CsoundHtmlWrapper::~CsoundHtmlWrapper() {
-    ScoreEvent *event = 0;
-    while (csound_event_queue.try_dequeue(event)) {
-        delete event;
-    }
-    char *score_text = 0;
-    while (csound_score_queue.try_dequeue(score_text)) {
-        free(score_text);
-    }
 }
 
 void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine)
 {
     m_csoundEngine = csEngine;
 	if (m_csoundEngine) {
-        csound = m_csoundEngine->getCsound();
+         csound.SetCsound(m_csoundEngine->getCsound());
     }
 }
 
 int CsoundHtmlWrapper::compileCsd(const QString &filename) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
 #if CS_APIVERSION>=4
-    return csoundCompileCsd(csound, filename.toLocal8Bit());
+    return csound.CompileCsd(filename.toLocal8Bit());
 #else
-    return csoundCompileCsd(csound, filename.toLocal8Bit().data());
+    return csound.CompileCsd(filename.toLocal8Bit().data());
 #endif
 }
 
 int CsoundHtmlWrapper::compileCsdText(const QString &text) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundCompileCsdText(csound, text.toLocal8Bit());
+    return csound.CompileCsdText(text.toLocal8Bit());
 }
 
 int CsoundHtmlWrapper::compileOrc(const QString &text) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundCompileOrc(csound, text.toLocal8Bit());
+    return csound.CompileOrc(text.toLocal8Bit());
 }
 
 double CsoundHtmlWrapper::evalCode(const QString &text) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundEvalCode(csound, text.toLocal8Bit());
+    return csound.EvalCode(text.toLocal8Bit());
 }
 
 double CsoundHtmlWrapper::get0dBFS() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGet0dBFS(csound); //cs->Get0dBFS();
+    return csound.Get0dBFS(); //cs->Get0dBFS();
 }
 
 int CsoundHtmlWrapper::getApiVersion() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetAPIVersion();
+    return csound.GetAPIVersion();
 }
 
 double CsoundHtmlWrapper::getControlChannel(const QString &name) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
     int result = 0;
-    double value = csoundGetControlChannel(csound, name.toLocal8Bit(), &result);
+    double value = csound.GetControlChannel(name.toLocal8Bit(), &result);
     return value;
 }
 
 qint64 CsoundHtmlWrapper::getCurrentTimeSamples() { // FIXME: unknown type int64_t qint64
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetCurrentTimeSamples(csound);
+    return csound.GetCurrentTimeSamples();
 }
 
 QString CsoundHtmlWrapper::getEnv(const QString &name) { // not sure, if it works... test with setGlobalEnv
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return QString();
     }
-    return csoundGetEnv(csound,name.toLocal8Bit());
+    return csound.GetEnv(name.toLocal8Bit());
 }
 
 int CsoundHtmlWrapper::getKsmps() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetKsmps(csound);
+    return csound.GetKsmps();
 }
 
 int CsoundHtmlWrapper::getNchnls() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetNchnls(csound);
+    return csound.GetNchnls();
 }
 
 int CsoundHtmlWrapper::getNchnlsInput() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetNchnlsInput(csound);
+    return csound.GetNchnlsInput();
 }
 
 QString CsoundHtmlWrapper::getOutputName() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return QString();
     }
-    return QString(csoundGetOutputName(csound));
+    return QString(csound.GetOutputName());
 }
 
 double CsoundHtmlWrapper::getScoreOffsetSeconds() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetScoreOffsetSeconds(csound);
+    return csound.GetScoreOffsetSeconds();
 }
 
 double CsoundHtmlWrapper::getScoreTime() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetScoreTime(csound);
+    return csound.GetScoreTime();
 }
 
 int CsoundHtmlWrapper::getSr() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundGetSr(csound);
+    return csound.GetSr();
 }
 
 QString CsoundHtmlWrapper::getStringChannel(const QString &name) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return QString();
     }
     char buffer[0x100];
-    csoundGetStringChannel(csound,name.toLocal8Bit(), buffer);
+    csound.GetStringChannel(name.toLocal8Bit(), buffer);
     return QString(buffer);
 }
 
 int CsoundHtmlWrapper::getVersion() {
-    return csoundGetVersion();
+    return csound.GetVersion();
 }
 
 bool CsoundHtmlWrapper::isPlaying() {
@@ -204,138 +193,87 @@ bool CsoundHtmlWrapper::isPlaying() {
 }
 
 int CsoundHtmlWrapper::isScorePending() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundIsScorePending(csound);
+    return csound.IsScorePending();
 }
 
 void CsoundHtmlWrapper::message(const QString &text) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundMessage(csound, "%s", text.toLocal8Bit().constData());
+    csound.Message("%s", text.toLocal8Bit().constData());
 }
 
 int CsoundHtmlWrapper::perform() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
-    if (csound_thread) {
-        return 0;
-    } else {
-        return 1;
-    }
+    // Perform in a separate thread of execution,
+    // but do not reset Csound (CsoundEngine will do that).
+    return csound.Perform(false);
 }
-
-int CsoundHtmlWrapper::perform_thread_routine() {
-    qDebug() ;
-    int result = 0;
-    message("Csound has started running...\n");
-    qDebug("Csound has started: result: %d", result);
-    ScoreEvent *event = 0;
-    char *score_text = 0;
-    int kperiods = 0;
-    csound_stop = false;
-    csound_finished = 0;
-    while (true) {
-        if (csound_stop == true) {
-            break;
-        }
-        while (csound_event_queue.try_dequeue(event)) {
-            csoundScoreEvent(csound, event->opcode, event->pfields.data(), event->pfields.size());
-            delete event;
-        }
-        while (csound_score_queue.try_dequeue(score_text)) {
-            csoundReadScore(csound, score_text);
-            free(score_text);
-        }
-        csound_finished = csoundPerformKsmps(csound);
-        if (csound_finished != 0) {
-            break;
-        }
-    }
-    message("Csound has stopped running.\n");
-    qDebug("Csound has stopped: kperiods: %d csound_stop: %d csound_finished: %d csound: %p", kperiods, csound_stop, csound_finished, csound);
-    while (csound_event_queue.try_dequeue(event)) {
-        delete event;
-    }
-    while (csound_score_queue.try_dequeue(score_text)) {
-        free(score_text);
-    }
-    // Although the thread has been started by the CsoundHtmlWrapper,
-    // this cleanup should be done by the CsoundEngine.
-    // result = csoundCleanup(csound_);
-    // csoundReset(csound_);
-    return csound_finished;
-}
-
 
 int CsoundHtmlWrapper::readScore(const QString &text) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    csound_score_queue.enqueue(strdup(text.toLocal8Bit()));
+    csound.ReadScore(text.toLocal8Bit());
     return 0;
 }
 
 void CsoundHtmlWrapper::reset() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundReset(csound);
+    csound.Reset();
 }
 
 void CsoundHtmlWrapper::rewindScore() {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundRewindScore(csound);
+    csound.RewindScore();
 }
 
 int CsoundHtmlWrapper::runUtility(const QString &command, int argc, char **argv) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundRunUtility(csound, command.toLocal8Bit(), argc, argv); // probably does not work from JS due char **
+    return csound.RunUtility(command.toLocal8Bit(), argc, argv); // probably does not work from JS due char **
 }
 
 int CsoundHtmlWrapper::scoreEvent(char opcode, const double *pfields, long field_count) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    ScoreEvent *event = new ScoreEvent;
-    event->opcode = opcode;
-    for(int i = 0; i < field_count; i++) {
-        event->pfields.push_back(pfields[i]);
-    }
-    csound_event_queue.enqueue(event);
+    csound.ScoreEvent(opcode, pfields, field_count);
     return 0;
 }
 
 void CsoundHtmlWrapper::setControlChannel(const QString &name, double value) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundSetControlChannel(csound,name.toLocal8Bit(), value);
+    csound.SetControlChannel(name.toLocal8Bit(), value);
 }
 
 int CsoundHtmlWrapper::setGlobalEnv(const QString &name, const QString &value) {
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundSetGlobalEnv(name.toLocal8Bit(), value.toLocal8Bit());
+    return csound.SetGlobalEnv(name.toLocal8Bit(), value.toLocal8Bit());
 }
 
 void CsoundHtmlWrapper::setInput(const QString &name){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
 #if CS_APIVERSION>=4
-    csoundSetInput(csound, name.toLocal8Bit());
+    csound.SetInput(name.toLocal8Bit());
 #else
-    csoundSetInput(csound, name.toLocal8Bit().data());
+    csound.SetInput(name.toLocal8Bit().data());
 #endif
 }
 
@@ -345,90 +283,83 @@ void CsoundHtmlWrapper::setMessageCallback(QObject *callback){
 }
 
 int CsoundHtmlWrapper::setOption(const QString &name){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
 #if CS_APIVERSION>=4
-    return csoundSetOption(csound, name.toLocal8Bit());
+    return csound.SetOption(name.toLocal8Bit().data());
 #else
-    return csoundSetOption(csound, name.toLocal8Bit().data());
+    return csound.SetOption(name.toLocal8Bit().data());
 #endif
 }
 
 void CsoundHtmlWrapper::setOutput(const QString &name, const QString &type, const QString &format){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
 #if CS_APIVERSION>=4
-    csoundSetOutput(csound, name.toLocal8Bit(), type.toLocal8Bit(), format.toLocal8Bit());
+    csound.SetOutput(name.toLocal8Bit(), type.toLocal8Bit(), format.toLocal8Bit());
 #else
-    csoundSetOutput(csound, name.toLocal8Bit().data(), type.toLocal8Bit().data(), format.toLocal8Bit().data());
+    csound.SetOutput(name.toLocal8Bit().data(), type.toLocal8Bit().data(), format.toLocal8Bit().data());
 #endif
 }
 
 void CsoundHtmlWrapper::setScoreOffsetSeconds(double value){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundSetScoreOffsetSeconds(csound, value);
+    csound.SetScoreOffsetSeconds(value);
 }
 
 void CsoundHtmlWrapper::setScorePending(bool value){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundSetScorePending(csound,(int) value);
+    csound.SetScorePending((int) value);
 }
 
 void CsoundHtmlWrapper::setStringChannel(const QString &name, const QString &value){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundSetStringChannel(csound,  name.toLocal8Bit(), value.toLocal8Bit().data());
+    csound.SetStringChannel(name.toLocal8Bit(), value.toLocal8Bit().data());
 }
 
 int CsoundHtmlWrapper::start(){
     int result = 0;
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    result = csoundStart(csound);
+    result = csound.Start();
     return result;
 }
 
 void CsoundHtmlWrapper::stop(){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csound_stop = true;
-    if (csound_thread) {
-        csound_thread->join();
-        csound_thread = nullptr;
-    }
-    // Although the thread has been started in the CsoundHtmlWrapper,
-    // the actual cleanup should be done by the CsoundEngine.
-    // csoundStop(csound);
+    csound.Stop();
 }
 
 double CsoundHtmlWrapper::tableGet(int table_number, int index){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundTableGet(csound, table_number, index);
+    return csound.TableGet(table_number, index);
 }
 
 int CsoundHtmlWrapper::tableLength(int table_number){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return -1;
     }
-    return csoundTableLength(csound, table_number);
+    return csound.TableLength(table_number);
 }
 
 void CsoundHtmlWrapper::tableSet(int table_number, int index, double value){
-    if (!csound) {
+    if (!csound.GetCsound()) {
         return;
     }
-    csoundTableSet(csound, table_number, index, value);
+    csound.TableSet(table_number, index, value);
 }
 
 

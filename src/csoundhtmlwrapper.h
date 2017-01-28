@@ -25,14 +25,8 @@
 
 #include <QObject>
 #include <QDebug>
-#include <thread>
-#include "concurrent_queue.h"
+#include <csound_threaded.hpp>
 #include "csoundengine.h"
-
-struct ScoreEvent {
-    char opcode;
-    std::vector<MYFLT> pfields;
-};
 
 class CsoundHtmlWrapper : public QObject
 {
@@ -40,7 +34,8 @@ class CsoundHtmlWrapper : public QObject
 public:
 	explicit CsoundHtmlWrapper(QObject *parent = 0);
     virtual ~CsoundHtmlWrapper();
-	void setCsoundEngine(CsoundEngine *csEngine); // necessay to get CsoundEngine::isPlaying()
+    // Necessary to get CsoundEngine::isPlaying().
+    void setCsoundEngine(CsoundEngine *csEngine);
 	Q_INVOKABLE int compileCsd(const QString &filename);
 	Q_INVOKABLE int compileCsdText(const QString &text);
 	Q_INVOKABLE int compileOrc(const QString &text);
@@ -63,7 +58,6 @@ public:
 	Q_INVOKABLE int isScorePending();
 	Q_INVOKABLE void message(const QString &text);
     Q_INVOKABLE int perform();
-    Q_INVOKABLE int perform_thread_routine();
     Q_INVOKABLE int readScore(const QString &text);
     Q_INVOKABLE void reset();
     Q_INVOKABLE void rewindScore();
@@ -85,14 +79,9 @@ public:
 	Q_INVOKABLE int tableLength(int table_number);
 	Q_INVOKABLE void tableSet(int table_number, int index, double value);
 private:
-    bool csound_stop;
-    int csound_finished;
-    CSOUND *csound;
     CsoundEngine *m_csoundEngine;
-    std::thread *csound_thread;
-    moodycamel::ConcurrentQueue<char *> csound_score_queue;
-    moodycamel::ConcurrentQueue<ScoreEvent *> csound_event_queue;
     QObject *message_callback;
+    CsoundThreaded csound;
 signals:
 	//void stateChanged(int state);
 };
