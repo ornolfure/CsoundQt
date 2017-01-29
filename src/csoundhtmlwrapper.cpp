@@ -210,9 +210,8 @@ int CsoundHtmlWrapper::perform() {
     if (!csound.GetCsound()) {
         return -1;
     }
-    // Perform in a separate thread of execution,
-    // but do not reset Csound (CsoundEngine will do that).
-    return csound.Perform(false);
+    // Perform in a separate thread of execution.
+    return csound.Perform();
 }
 
 int CsoundHtmlWrapper::readScore(const QString &text) {
@@ -339,6 +338,9 @@ void CsoundHtmlWrapper::stop(){
         return;
     }
     csound.Stop();
+    // Prevent the host from restarting Csound before it has finished
+    // stopping.
+    csound.Join();
 }
 
 double CsoundHtmlWrapper::tableGet(int table_number, int index){
