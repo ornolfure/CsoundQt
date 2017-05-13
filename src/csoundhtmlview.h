@@ -4,6 +4,7 @@
 #if defined(QCS_QTHTML)
 
 #include <atomic>
+#include <cstdint>
 #include <QDebug>
 #include <QDockWidget>
 #include "csoundhtmlwrapper.h"
@@ -47,8 +48,7 @@ public:
 #endif
 #ifdef USE_WEBENGINE
 	QWebChannel channel ;            // Channel for C++ to Javascript comms
-	QWebEngineView * webView;
-
+    QWebEngineView *webView;
 #endif
 
 public slots:
@@ -60,13 +60,15 @@ protected:
 	//virtual void closeEvent(QCloseEvent *event);
 private:
 	Ui::Html5GuiDisplay *ui;
-	std::atomic<DocumentPage *> documentPage; // ?? why and what is std::atomic
-    pid_t pid;
-
+    std::atomic<DocumentPage *> documentPage;
+#if defined(_MSC_VER)
+    DWORD pid;
+#else
+    std::pid_t pid;
+#endif
 	CsoundHtmlWrapper csoundWrapper;
 	CsoundEngine * m_csoundEngine;
-	QTemporaryFile  tempHtml;
-
+    QTemporaryFile tempHtml;
 };
 
 #endif
