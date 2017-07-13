@@ -886,23 +886,34 @@ int CsoundEngine::runCsound()
 	csoundSetExitGraphCallback(ud->csound, &CsoundEngine::exitGraphCallback);
     // Do not run the performance thread if the piece is an HTML file,
     // the HTML code must do that.
-    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) {
-        return 0;
-    }
+//    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) {
+//        return 0;
+//    }
+    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! options not set if play() is not called with options => wrapper must know this.
+        qDebug()<<"This is html file. Do I need to compile anythint?"; // TODO: filename not set here...
+        if (!ud->csound) {
+            qDebug()<<"csound is null";
+        }
+        foreach (QString flag, m_options.generateCmdLineFlagsList() ) {
+            int ret = csoundSetOption(ud->csound, flag.toLocal8Bit());
+        }
+    } else {
 #if CS_APIVERSION>=4
-	char const **argv;// since there was change in Csound API
-	argv = (const char **) calloc(33, sizeof(char*));
+        char const **argv;// since there was change in Csound API
+        argv = (const char **) calloc(33, sizeof(char*));
 #else
-	char **argv;
-	argv = (char **) calloc(33, sizeof(char*));
+        char **argv;
+        argv = (char **) calloc(33, sizeof(char*));
 #endif
-	int argc = m_options.generateCmdLine((char **)argv);
-	ud->result=csoundCompile(ud->csound,argc,argv);
-	for (int i = 0; i < argc; i++) {
-		qDebug()  << argv[i];
-		free((char *) argv[i]);
-	}
-	free(argv);
+        int argc = m_options.generateCmdLine((char **)argv);
+        // html - compile with template csd here??
+        ud->result=csoundCompile(ud->csound,argc,argv);
+        for (int i = 0; i < argc; i++) {
+            qDebug()  << argv[i];
+            free((char *) argv[i]);
+        }
+        free(argv);
+    }
 	if (ud->result!=CSOUND_SUCCESS) {
 		qDebug()  << "Csound compile failed! "  << ud->result;
         flushQueues(); // the line was here in some earlier version. Otherwise errormessaged won't be processed by Console::appendMessage()

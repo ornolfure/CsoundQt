@@ -204,19 +204,21 @@ void CsoundHtmlWrapper::message(const QString &text) {
 
 int CsoundHtmlWrapper::perform() {
     if (!csound) {
-        //maybe create csound here?
-       csound = csoundCreate(NULL);
-       // but what about CsoundOptions??
-       // first time default (-o test.wav is taken), second time works...
-       //maybe perfomrCsd(QString string)
+        return -1;
+        csound = csoundCreate(NULL);
+        // but what about CsoundOptions??
     }
     stop();
-    csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
-    if (csound_thread) {
-        return 0;
-    } else {
-        return 1;
+    if (m_csoundEngine) {
+        int ret = m_csoundEngine->runCsound();
+        return ret;
     }
+//    csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
+//    if (csound_thread) {
+//        return 0;
+//    } else {
+//        return 1;
+//    }
 }
 
 int CsoundHtmlWrapper::perform_thread_routine() {
