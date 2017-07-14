@@ -1627,7 +1627,7 @@ void CsoundQt::play(bool realtime, int index)
 			qDebug()<<"update html on run";
 		}
 		if (!documentPages[curPage]->getHtmlText().isEmpty()) {
-			csoundHtmlView->setCsoundEngine(getEngine(curPage));
+            csoundHtmlView->setCsoundEngine(getEngine(curPage), m_options);
 		}
 	}
 #endif
@@ -5925,7 +5925,7 @@ void CsoundQt::updateHtmlView()
 {
 	QString htmlText = documentPages[curPage]->getHtmlText();
 	if (!htmlText.isEmpty()) {
-		csoundHtmlView->setCsoundEngine(getEngine(curPage));
+        csoundHtmlView->setCsoundEngine(getEngine(curPage), m_options );
         csoundHtmlView->load(documentPages[curPage]);
 	} else {
 		csoundHtmlView->clear();

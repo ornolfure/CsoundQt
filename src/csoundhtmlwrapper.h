@@ -34,8 +34,9 @@ class CsoundHtmlWrapper : public QObject
     Q_OBJECT
 public:
 	explicit CsoundHtmlWrapper(QObject *parent = 0);
-	void setCsoundEngine(CsoundEngine *csEngine); // necessay to get CsoundEngine::isPlaying()
-	Q_INVOKABLE int compileCsd(const QString &filename);
+    void setCsoundEngine(CsoundEngine *csEngine, CsoundOptions *options); // necessay to get CsoundEngine::isPlaying()
+
+    Q_INVOKABLE int compileCsd(const QString &filename);
 	Q_INVOKABLE int compileCsdText(const QString &text);
 	Q_INVOKABLE int compileOrc(const QString &text);
 	Q_INVOKABLE double evalCode(const QString &text);
@@ -82,6 +83,7 @@ private:
     bool csound_finished;
     CSOUND *csound;
     CsoundEngine *m_csoundEngine;
+    CsoundOptions *m_options;
     std::thread *csound_thread;
     QObject *message_callback;
 signals:

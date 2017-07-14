@@ -39,7 +39,7 @@ public:
     void loadFromUrl(const QUrl &url);
     void load(DocumentPage *documentPage);
     void stop();
-	void setCsoundEngine(CsoundEngine *csEngine) {csoundWrapper.setCsoundEngine(csEngine); }
+    void setCsoundEngine(CsoundEngine *csEngine, CsoundOptions *options) {csoundWrapper.setCsoundEngine(csEngine, options); }
     void viewHtml(QString htmlText);
 	void clear();
 #ifdef USE_WEBKIT

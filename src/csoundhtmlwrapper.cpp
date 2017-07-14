@@ -38,11 +38,12 @@ CsoundHtmlWrapper::CsoundHtmlWrapper(QObject *parent) :
 {
 }
 
-void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine)
+void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine, CsoundOptions *options)
 {
     m_csoundEngine = csEngine;
 	if (m_csoundEngine) {
         csound = m_csoundEngine->getCsound();
+        m_options = options;
     }
 }
 
@@ -205,12 +206,12 @@ void CsoundHtmlWrapper::message(const QString &text) {
 int CsoundHtmlWrapper::perform() {
     if (!csound) {
         return -1;
-        csound = csoundCreate(NULL);
+        //csound = csoundCreate(NULL);
         // but what about CsoundOptions??
     }
     stop();
     if (m_csoundEngine) {
-        int ret = m_csoundEngine->runCsound();
+        int ret = m_csoundEngine->play(m_options); ; // must be run with options...
         return ret;
     }
 //    csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);

@@ -431,7 +431,8 @@ void CsoundEngine::csThread(void *data)
 	if (!(udata->flags & QCS_NO_COPY_BUFFER)) {
 		MYFLT *outputBuffer = csoundGetSpout(udata->csound);
 		for (int i = 0; i < udata->outputBufferSize*udata->numChnls; i++) {
-			udata->audioOutputBuffer.put(outputBuffer[i]/ udata->zerodBFS);
+            if (outputBuffer) // added for html
+                udata->audioOutputBuffer.put(outputBuffer[i]/ udata->zerodBFS);
 		}
 	}
 	//  udata->wl->getValues(&udata->channelNames,
@@ -889,6 +890,7 @@ int CsoundEngine::runCsound()
 //    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) {
 //        return 0;
 //    }
+
     if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! options not set if play() is not called with options => wrapper must know this.
         qDebug()<<"This is html file. Do I need to compile anythint?"; // TODO: filename not set here...
         if (!ud->csound) {
