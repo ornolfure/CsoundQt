@@ -86,6 +86,7 @@ private:
     CsoundOptions *m_options;
     std::thread *csound_thread;
     QObject *message_callback;
+	int checkCsound();
 signals:
 	//void stateChanged(int state);
 };

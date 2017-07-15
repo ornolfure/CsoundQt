@@ -49,9 +49,7 @@ void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine, CsoundOptions *o
 
 int CsoundHtmlWrapper::compileCsd(const QString &filename) {
     if (!csound) {
-        return -1;
-        // or maybe let's create it here, if for example html file...
-        //csound = csoundCreate(NULL);
+        return -1;        
     }
 #if CS_APIVERSION>=4
     return csoundCompileCsd(csound, filename.toLocal8Bit());
@@ -61,35 +59,24 @@ int CsoundHtmlWrapper::compileCsd(const QString &filename) {
 }
 
 int CsoundHtmlWrapper::compileCsdText(const QString &text) {
-    csound = m_csoundEngine->getCsound(); // should I check for m_csoundEngine not being 0???
-    if (!csound) { // should I check for engine->getCsound()?
-        //return -1;
-        // or maybe let's create it here, if for example html file...
-        int ret = m_csoundEngine->prepareCsound(m_options);
-        csound = m_csoundEngine->getCsound();
 
-        //        if (m_csoundEngine) {
-//            CsoundUserData * ud = m_csoundEngine->getUserData();
-//            csound = csoundCreate(ud);
-//            ud->csound = csound; // dangerous?? in which thread is it created?
-//        } else {
-//            return -1;
-//        }
+	if (!checkCsound()) {
+		return -1;
     }
     return csoundCompileCsdText(csound, text.toLocal8Bit());
 }
 
 int CsoundHtmlWrapper::compileOrc(const QString &text) {
-    if (!csound) {
-        return -1;
-    }
+	if (!checkCsound()) {
+		return -1;
+	}
     return csoundCompileOrc(csound, text.toLocal8Bit());
 }
 
 double CsoundHtmlWrapper::evalCode(const QString &text) {
-    if (!csound) {
-        return -1;
-    }
+	if (!checkCsound()) {
+		return -1;
+	}
     return csoundEvalCode(csound, text.toLocal8Bit());
 }
 
@@ -214,23 +201,14 @@ void CsoundHtmlWrapper::message(const QString &text) {
 }
 
 int CsoundHtmlWrapper::perform() {
-    if (!csound) {
-        return -1;
-        //csound = csoundCreate(NULL);
-        // but what about CsoundOptions??
-    }
+	if (!checkCsound()) {
+		return -1;
+	}
     stop();
     if (m_csoundEngine) {
-        int ret = m_csoundEngine->startPerformanceThread();//m_csoundEngine->play(m_options); ; // must be run with options...
+		int ret = m_csoundEngine->startPerformanceThread();
         return ret;
     }
-
-//    csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
-//    if (csound_thread) {
-//        return 0;
-//    } else {
-//        return 1;
-//    }
 }
 
 int CsoundHtmlWrapper::perform_thread_routine() {
@@ -249,16 +227,16 @@ int CsoundHtmlWrapper::perform_thread_routine() {
     // result = csoundCleanup(csound);
     // if (result) {
     //     message("Failed to clean up Csound performance.");
-    // }
+	// }
     csoundReset(csound);
     return result;
 }
 
 
 int CsoundHtmlWrapper::readScore(const QString &text) {
-    if (!csound) {
-        return -1;
-    }
+	if (!checkCsound()) {  // is it good idea to have checkCsound also here? prpbablt no problem, if csound is set.
+		return -1;
+	}
     return csoundReadScore(csound, text.toLocal8Bit());
 }
 
@@ -368,14 +346,6 @@ void CsoundHtmlWrapper::stop(){
         return;
     }
     m_csoundEngine->stop();
-//    csound_stop = true;
-//    if (csound_thread) {
-//        csound_thread->join();
-//        csound_thread = nullptr;
-//    }
-    // Although the thread has been started in the CsoundHtmlWrapper,
-    // the actual cleanup should be done by the CsoundEngine.
-    // csoundStop(csound);
 }
 
 double CsoundHtmlWrapper::tableGet(int table_number, int index){
@@ -396,7 +366,27 @@ void CsoundHtmlWrapper::tableSet(int table_number, int index, double value){
     if (!csound) {
         return;
     }
-    csoundTableSet(csound, table_number, index, value);
+	csoundTableSet(csound, table_number, index, value);
+}
+
+int CsoundHtmlWrapper::checkCsound() // checks if CsoundEngine and CsoundOptions are set and if csound is 0 in CsoundEngine, creates it (call prepareCsound to get it ready for performance).
+// call this function from compileCsdText, compileOrc and other functions that can be called from html-only file before perform().
+{
+	if (!m_csoundEngine) {
+		qDebug()<<"CsoundEngine not available for CsoundHtmlWrapper!";
+		return -2;
+	}
+	if (!m_options) {
+		qDebug()<<"CsoundOptions not set for CsoundHtmlWrapper!";
+		return -3;
+	}
+	if (!m_csoundEngine->getCsound()) {
+		qDebug()<<"Preapare Csound for compilation";
+		int ret =m_csoundEngine->prepareCsound(m_options); // coundCreate() is executed here
+		csound = m_csoundEngine->getCsound();
+		return ret;
+	}
+	return -4; // if it arrives here at all
 }
 
 
