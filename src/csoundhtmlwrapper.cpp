@@ -61,7 +61,8 @@ int CsoundHtmlWrapper::compileCsd(const QString &filename) {
 }
 
 int CsoundHtmlWrapper::compileCsdText(const QString &text) {
-    if (!csound) {
+    csound = m_csoundEngine->getCsound(); // should I check for m_csoundEngine not being 0???
+    if (!csound) { // should I check for engine->getCsound()?
         //return -1;
         // or maybe let's create it here, if for example html file...
         int ret = m_csoundEngine->prepareCsound(m_options);
