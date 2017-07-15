@@ -767,6 +767,181 @@ void CsoundEngine::queueEvent(QString eventLine, int delay)
 	}
 }
 
+int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCound withoud compile
+{
+    //QMutexLocker locker(&m_playMutex);
+    if (options) {
+        m_options = *options;
+    }
+#ifdef MACOSX_PRE_SNOW
+    // Remember menu bar to set it after FLTK grabs it
+    menuBarHandle = GetMenuBar();
+#endif
+#ifdef Q_OS_WIN
+    // Call OleInitialize twice to keep the FLTK opcodes from reducing the COM
+    // reference count to zero.
+    OleInitialize(NULL);
+    OleInitialize(NULL);
+#endif
+    eventQueueSize = 0;
+    // Flush events gathered while idle.
+    ud->audioOutputBuffer.allZero();
+    ud->msgRefreshTime = m_refreshTime*1000;
+    QDir::setCurrent(m_options.fileName1);
+    for (int i = 0; i < consoles.size(); i++) {
+        consoles[0]->reset();
+    }
+#ifdef QCS_DESTROY_CSOUND
+    ud->csound=csoundCreate((void *) ud);
+#ifdef CSOUND6
+    ud->midiBuffer = csoundCreateCircularBuffer(ud->csound, 1024, sizeof(unsigned char));
+    Q_ASSERT(ud->midiBuffer);
+    ud->virtualMidiBuffer = csoundCreateCircularBuffer(ud->csound, 1024, sizeof(unsigned char));
+    Q_ASSERT(ud->virtualMidiBuffer);
+    // csoundFlushCircularBuffer(ud->csound, ud->midiBuffer);
+#endif
+#endif
+#ifdef QCS_DEBUGGER
+    if(m_debugging) {
+        csoundDebuggerInit(ud->csound);
+        foreach(QVariantList bp, m_startBreakpoints) {
+            Q_ASSERT(bp.size() > 1);
+            if (bp[0].toString() == "instr") {
+                Q_ASSERT(bp.size() == 3);
+                csoundSetInstrumentBreakpoint(ud->csound, bp[1].toDouble(), bp[2].toInt());
+            } else if (bp[0].toString() == "line") {
+                Q_ASSERT(bp.size() == 4);
+                csoundSetBreakpoint(ud->csound, bp[2].toInt(), bp[1].toInt(), bp[3].toInt());
+            } else {
+                qDebug()  << "Wrong breakpoint format";
+            }
+        }
+        csoundSetBreakpointCallback(ud->csound, &CsoundEngine::breakpointCallback, (void *) this);
+    }
+#endif
+    if(!m_options.useCsoundMidi) {
+#ifdef CSOUND6
+        csoundSetHostImplementedMIDIIO(ud->csound, 1);
+#endif
+        csoundSetExternalMidiInOpenCallback(ud->csound, &midiInOpenCb);
+        csoundSetExternalMidiReadCallback(ud->csound, &midiReadCb);
+        csoundSetExternalMidiInCloseCallback(ud->csound, &midiInCloseCb);
+        csoundSetExternalMidiOutOpenCallback(ud->csound, &midiOutOpenCb);
+        csoundSetExternalMidiWriteCallback(ud->csound, &midiWriteCb);
+        csoundSetExternalMidiOutCloseCallback(ud->csound, &midiOutCloseCb);
+        csoundSetExternalMidiErrorStringCallback(ud->csound, &midiErrorStringCb);
+    }
+#ifdef CSOUND6
+    csoundCreateMessageBuffer(ud->csound, 0);
+#else
+    // Message Callbacks must be set before compile, otherwise some information is missed
+    csoundSetMessageCallback(ud->csound, &CsoundEngine::messageCallbackThread);
+    csoundPreCompile(ud->csound);  //Need to run PreCompile to create the FLTK_Flags global variable
+#endif
+    if (m_options.enableFLTK) {
+        // Disable FLTK graphs, but allow FLTK widgets.
+        int *var = (int*) csoundQueryGlobalVariable(ud->csound, "FLTK_Flags");
+        if (var) {
+            *var = 4;
+        } else {
+            if (csoundCreateGlobalVariable(ud->csound, "FLTK_Flags", sizeof(int)) != CSOUND_SUCCESS) {
+                qDebug()  << "Error creating the FTLK_Flags variable";
+            }  else {
+                int *var = (int*) csoundQueryGlobalVariable(ud->csound, "FLTK_Flags");
+                if (var) {
+                    *var = 4;
+                } else {
+                    qDebug()  << "Error reading the FTLK_Flags variable";
+                }
+            }
+        }
+    }
+    else {
+        //       qDebug()  << "FLTK Disabled");
+        csoundSetGlobalEnv("CS_OMIT_LIBS", "fluidOpcodes,virtual,widgets");
+        int *var = (int*) csoundQueryGlobalVariable(ud->csound, "FLTK_Flags");
+        if (var) {
+            *var = 3;
+        } else {
+            qDebug()  << "Error reading the FTLK_Flags variable";
+        }
+    }
+#ifdef CSOUND6
+    csoundRegisterKeyboardCallback(ud->csound,
+                                   &CsoundEngine::keyEventCallback,
+                                   (void *) ud, CSOUND_CALLBACK_KBD_EVENT | CSOUND_CALLBACK_KBD_TEXT);
+    csoundKeyPress(getCsound(),'\0'); // necessary to put something into the buffer, otherwise sensekey complains when not started from terminal
+#else
+    csoundSetCallback(ud->csound,
+                      &CsoundEngine::keyEventCallback,
+                      (void *) ud, CSOUND_CALLBACK_KBD_EVENT | CSOUND_CALLBACK_KBD_TEXT);
+#endif
+#ifdef QCS_RTMIDI
+    if (!m_options.useCsoundMidi) {
+        csoundSetOption(ud->csound, const_cast<char *>("-+rtmidi=hostbased"));
+        csoundSetOption(ud->csound, const_cast<char *>("-M0"));
+        csoundSetOption(ud->csound, const_cast<char *>("-Q0"));
+    }
+#endif
+    csoundSetIsGraphable(ud->csound, true);
+    csoundSetMakeGraphCallback(ud->csound, &CsoundEngine::makeGraphCallback);
+    csoundSetDrawGraphCallback(ud->csound, &CsoundEngine::drawGraphCallback);
+    csoundSetKillGraphCallback(ud->csound, &CsoundEngine::killGraphCallback);
+    csoundSetExitGraphCallback(ud->csound, &CsoundEngine::exitGraphCallback);
+
+    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! reuired change in Basedocument -  set options for CsoundEngine if html on init, not only on run
+        qDebug()<<"This is html file. Do I need to compile anythint?"; // TODO: filename not set here...
+        foreach (QString flag, m_options.generateCmdLineFlagsList() ) {
+            int ret = csoundSetOption(ud->csound, flag.toLocal8Bit());
+        }
+    }
+    // performance thread must be created in seprate function
+}
+
+int CsoundEngine::startPerformanceThread()
+{
+    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! options not set if play() is not called with options => wrapper must know this.
+        ud->result = csoundStart(ud->csound); // html must habe been done compilation from here already;
+    } else {
+#if CS_APIVERSION>=4
+        char const **argv;// since there was change in Csound API
+        argv = (const char **) calloc(33, sizeof(char*));
+#else
+        char **argv;
+        argv = (char **) calloc(33, sizeof(char*));
+#endif
+        int argc = m_options.generateCmdLine((char **)argv);
+        // html - compile with template csd here??
+        ud->result=csoundCompile(ud->csound,argc,argv);
+        for (int i = 0; i < argc; i++) {
+            qDebug()  << argv[i];
+            free((char *) argv[i]);
+        }
+        free(argv);
+    }
+    if (ud->result!=CSOUND_SUCCESS) {
+        qDebug()  << "Csound compile failed! "  << ud->result;
+        //flushQueues seemd to hang..
+        //flushQueues(); // the line was here in some earlier version. Otherwise errormessaged won't be processed by Console::appendMessage()
+        //locker.unlock(); // otherwise csoundStop will freeze //NB! should we keep this mutex and set it in prepareCsound()
+        stop();
+        emit (errorLines(getErrorLines()));
+        return -3;
+    }
+    ud->zerodBFS = csoundGet0dBFS(ud->csound);
+    ud->sampleRate = csoundGetSr(ud->csound);
+    ud->numChnls = csoundGetNchnls(ud->csound);
+    ud->outputBufferSize = csoundGetKsmps(ud->csound);
+    if (ud->enableWidgets) {
+        setupChannels();
+    }
+    ud->perfThread = new CsoundPerformanceThread(ud->csound);
+    ud->perfThread->SetProcessCallback(CsoundEngine::csThread, (void*)ud);
+    ud->perfThread->Play();
+    return 0;
+}
+
+
 int CsoundEngine::runCsound()
 {
 	QMutexLocker locker(&m_playMutex);

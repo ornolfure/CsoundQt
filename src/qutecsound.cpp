@@ -5070,6 +5070,9 @@ bool CsoundQt::makeNewPage(QString fileName, QString text)
     documentPages.insert(insertPoint, newPage);
     //  documentPages[curPage]->setOpcodeNameList(m_opcodeTree->opcodeNameList());
 	documentPages[curPage]->showLiveEventControl(false);
+    if (fileName.endsWith(".html", Qt::CaseInsensitive)) { // otherwise it will not be set for html files for CsoundEngine
+        m_options->fileName1 = fileName;
+    }
     setCurrentOptionsForPage(documentPages[curPage]);
 
     documentPages[curPage]->setFileName(fileName);  // Must set before sending text to set highlighting mode

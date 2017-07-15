@@ -49,9 +49,9 @@ void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine, CsoundOptions *o
 
 int CsoundHtmlWrapper::compileCsd(const QString &filename) {
     if (!csound) {
-        //return -1;
+        return -1;
         // or maybe let's create it here, if for example html file...
-        csound = csoundCreate(NULL);
+        //csound = csoundCreate(NULL);
     }
 #if CS_APIVERSION>=4
     return csoundCompileCsd(csound, filename.toLocal8Bit());
@@ -64,7 +64,16 @@ int CsoundHtmlWrapper::compileCsdText(const QString &text) {
     if (!csound) {
         //return -1;
         // or maybe let's create it here, if for example html file...
-        csound = csoundCreate(NULL);
+        int ret = m_csoundEngine->prepareCsound(m_options);
+        csound = m_csoundEngine->getCsound();
+
+        //        if (m_csoundEngine) {
+//            CsoundUserData * ud = m_csoundEngine->getUserData();
+//            csound = csoundCreate(ud);
+//            ud->csound = csound; // dangerous?? in which thread is it created?
+//        } else {
+//            return -1;
+//        }
     }
     return csoundCompileCsdText(csound, text.toLocal8Bit());
 }
@@ -211,9 +220,10 @@ int CsoundHtmlWrapper::perform() {
     }
     stop();
     if (m_csoundEngine) {
-        int ret = m_csoundEngine->play(m_options); ; // must be run with options...
+        int ret = m_csoundEngine->startPerformanceThread();//m_csoundEngine->play(m_options); ; // must be run with options...
         return ret;
     }
+
 //    csound_thread = new std::thread(&CsoundHtmlWrapper::perform_thread_routine, this);
 //    if (csound_thread) {
 //        return 0;
@@ -353,14 +363,15 @@ void CsoundHtmlWrapper::setStringChannel(const QString &name, const QString &val
 }
 
 void CsoundHtmlWrapper::stop(){
-    if (!csound) {
+    if (!m_csoundEngine) {
         return;
     }
-    csound_stop = true;
-    if (csound_thread) {
-        csound_thread->join();
-        csound_thread = nullptr;
-    }
+    m_csoundEngine->stop();
+//    csound_stop = true;
+//    if (csound_thread) {
+//        csound_thread->join();
+//        csound_thread = nullptr;
+//    }
     // Although the thread has been started in the CsoundHtmlWrapper,
     // the actual cleanup should be done by the CsoundEngine.
     // csoundStop(csound);

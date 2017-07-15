@@ -232,12 +232,17 @@ public slots:
 	void registerGraph(QuteGraph *scope);
 	void setFlags(PerfFlags flags) {ud->flags = flags;}
 
-	void evaluate(QString code);
+    void evaluate(QString code);
+
 public:
 	int runCsound();
 	void stopCsound();
+    int prepareCsound(CsoundOptions *options);
+    int startPerformanceThread();
+    //void setCsoundOptions(CsoundOptions *options);
 
-	void cleanupCsound();
+    void cleanupCsound();
+
 private:
 	void setupChannels();
 
