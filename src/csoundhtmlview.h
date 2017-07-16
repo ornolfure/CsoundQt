@@ -61,7 +61,11 @@ protected:
 private:
 	Ui::Html5GuiDisplay *ui;
 	std::atomic<DocumentPage *> documentPage; // ?? why and what is std::atomic
+#ifdef _MSC_VER
+    DWORD pid;
+#else
     pid_t pid;
+#endif
 
 	CsoundHtmlWrapper csoundWrapper;
 	CsoundEngine * m_csoundEngine;
