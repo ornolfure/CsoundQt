@@ -235,8 +235,7 @@ int CsoundHtmlWrapper::perform_thread_routine() {
 
 
 int CsoundHtmlWrapper::readScore(const QString &text) {
-
-    if (checkCsound()) {  // is it good idea to have checkCsound also here? prpbablt no problem, if csound is set.
+    if (!csound) {
 		return -1;
 	}  
     qDebug();
@@ -401,7 +400,7 @@ int CsoundHtmlWrapper::checkCsound() // checks if CsoundEngine and CsoundOptions
 		return -3;
 	}
 	if (!m_csoundEngine->getCsound()) {
-		qDebug()<<"Preapare Csound for compilation";
+        qDebug()<<"Prepare Csound for compilation...";
 		int ret =m_csoundEngine->prepareCsound(m_options); // coundCreate() is executed here
 		csound = m_csoundEngine->getCsound();
 		return ret;

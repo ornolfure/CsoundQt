@@ -779,9 +779,6 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
     menuBarHandle = GetMenuBar();
 #endif
 #ifdef Q_OS_WIN //NB! this is not needed here any more, fixed in develop branch.
-    // Call OleInitialize twice to keep the FLTK opcodes from reducing the COM
-    // reference count to zero.
-    OleInitialize(NULL);
     OleInitialize(NULL);
 #endif
     eventQueueSize = 0;
@@ -1381,7 +1378,11 @@ bool CsoundEngine::isRecording()
 
 CSOUND *CsoundEngine::getCsound()
 {
-	return ud->csound;
+    if (ud) {
+        return ud->csound;
+    } else {
+        return nullptr;
+    }
 }
 
 #ifdef QCS_PYTHONQT
