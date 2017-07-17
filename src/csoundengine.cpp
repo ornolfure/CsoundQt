@@ -897,6 +897,7 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
         }
     }
     // performance thread must be created in seprate function
+    return 0;
 }
 
 int CsoundEngine::startPerformanceThread()
