@@ -773,11 +773,12 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
     if (options) {
         m_options = *options;
     }
+
 #ifdef MACOSX_PRE_SNOW
     // Remember menu bar to set it after FLTK grabs it
     menuBarHandle = GetMenuBar();
 #endif
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN //NB! this is not needed here any more, fixed in develop branch.
     // Call OleInitialize twice to keep the FLTK opcodes from reducing the COM
     // reference count to zero.
     OleInitialize(NULL);
@@ -890,7 +891,7 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
     csoundSetExitGraphCallback(ud->csound, &CsoundEngine::exitGraphCallback);
 
     if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! reuired change in Basedocument -  set options for CsoundEngine if html on init, not only on run
-        qDebug()<<"This is html file. Do I need to compile anythint?"; // TODO: filename not set here...
+        qDebug()<<"This is html file. Setting options CsoundOptions. here"; // TODO: filename not set here...
         foreach (QString flag, m_options.generateCmdLineFlagsList() ) {
             int ret = csoundSetOption(ud->csound, flag.toLocal8Bit());
         }
@@ -901,7 +902,10 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
 int CsoundEngine::startPerformanceThread()
 {
     if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! options not set if play() is not called with options => wrapper must know this.
-        ud->result = csoundStart(ud->csound); // html must habe been done compilation from here already;
+        qDebug()<<"csoundStart() must be called from javascript, not here.";
+        //ud->result = csoundStart(ud->csound); // html must habe been done compilation from here already;
+        // how to check check, if already running
+
     } else {
 #if CS_APIVERSION>=4
         char const **argv;// since there was change in Csound API

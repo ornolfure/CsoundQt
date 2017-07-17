@@ -234,9 +234,12 @@ int CsoundHtmlWrapper::perform_thread_routine() {
 
 
 int CsoundHtmlWrapper::readScore(const QString &text) {
-	if (!checkCsound()) {  // is it good idea to have checkCsound also here? prpbablt no problem, if csound is set.
+    qDebug();
+    if (!checkCsound()) {  // is it good idea to have checkCsound also here? prpbablt no problem, if csound is set.
 		return -1;
-	}
+	}  
+    // if html only, needs to pass a message to engine
+    //m_csoundEngine->queueEvent(text.toLocal8Bit());
     return csoundReadScore(csound, text.toLocal8Bit());
 }
 
@@ -341,10 +344,19 @@ void CsoundHtmlWrapper::setStringChannel(const QString &name, const QString &val
     csoundSetStringChannel(csound,  name.toLocal8Bit(), value.toLocal8Bit().data());
 }
 
+int CsoundHtmlWrapper::start()
+{
+    if (!checkCsound()) { // TODO: how to avoid "Csound already started" problem?
+        return -1;
+    }
+    return csoundStart(csound);
+}
+
 void CsoundHtmlWrapper::stop(){
     if (!m_csoundEngine) {
         return;
     }
+    qDebug();
     m_csoundEngine->stop();
 }
 
