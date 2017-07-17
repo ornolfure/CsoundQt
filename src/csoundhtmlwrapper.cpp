@@ -201,14 +201,15 @@ void CsoundHtmlWrapper::message(const QString &text) {
 }
 
 int CsoundHtmlWrapper::perform() {
+    int result = -1;
     if (checkCsound()) {
-		return -1;
+        return result;
 	}
     stop();
     if (m_csoundEngine) {
-		int ret = m_csoundEngine->startPerformanceThread();
-        return ret;
+        result = m_csoundEngine->startPerformanceThread();
     }
+    return result;
 }
 
 int CsoundHtmlWrapper::perform_thread_routine() {
@@ -350,7 +351,10 @@ void CsoundHtmlWrapper::setStringChannel(const QString &name, const QString &val
 
 int CsoundHtmlWrapper::start()
 {
-    if (checkCsound()) { // TODO: how to avoid "Csound already started" problem?
+    ///if (checkCsound()) { // TODO: how to avoid "Csound already started" problem?
+    ///    return -1;
+    ///}
+    if (!csound) {
         return -1;
     }
     return csoundStart(csound);
