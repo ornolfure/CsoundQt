@@ -60,21 +60,21 @@ int CsoundHtmlWrapper::compileCsd(const QString &filename) {
 
 int CsoundHtmlWrapper::compileCsdText(const QString &text) {
 
-	if (!checkCsound()) {
+    if (checkCsound()) {
 		return -1;
     }
     return csoundCompileCsdText(csound, text.toLocal8Bit());
 }
 
 int CsoundHtmlWrapper::compileOrc(const QString &text) {
-	if (!checkCsound()) {
+    if (checkCsound()) {
 		return -1;
 	}
     return csoundCompileOrc(csound, text.toLocal8Bit());
 }
 
 double CsoundHtmlWrapper::evalCode(const QString &text) {
-	if (!checkCsound()) {
+    if (checkCsound()) {
 		return -1;
 	}
     return csoundEvalCode(csound, text.toLocal8Bit());
@@ -201,7 +201,7 @@ void CsoundHtmlWrapper::message(const QString &text) {
 }
 
 int CsoundHtmlWrapper::perform() {
-	if (!checkCsound()) {
+    if (checkCsound()) {
 		return -1;
 	}
     stop();
@@ -234,20 +234,24 @@ int CsoundHtmlWrapper::perform_thread_routine() {
 
 
 int CsoundHtmlWrapper::readScore(const QString &text) {
-    qDebug();
-    if (!checkCsound()) {  // is it good idea to have checkCsound also here? prpbablt no problem, if csound is set.
+
+    if (checkCsound()) {  // is it good idea to have checkCsound also here? prpbablt no problem, if csound is set.
 		return -1;
 	}  
+    qDebug();
     // if html only, needs to pass a message to engine
     //m_csoundEngine->queueEvent(text.toLocal8Bit());
     return csoundReadScore(csound, text.toLocal8Bit());
 }
 
 void CsoundHtmlWrapper::reset() {
-    if (!csound) {
+    if (!m_csoundEngine) {
         return;
     }
-    csoundReset(csound);
+    // maybe even better:
+    m_csoundEngine->cleanupCsound();
+    // in this point m_CsoundEngine can be already 0...
+    //this seems to fail: csoundReset(m_csoundEngine->getCsound());
 }
 
 void CsoundHtmlWrapper::rewindScore() {
@@ -346,7 +350,7 @@ void CsoundHtmlWrapper::setStringChannel(const QString &name, const QString &val
 
 int CsoundHtmlWrapper::start()
 {
-    if (!checkCsound()) { // TODO: how to avoid "Csound already started" problem?
+    if (checkCsound()) { // TODO: how to avoid "Csound already started" problem?
         return -1;
     }
     return csoundStart(csound);
@@ -356,7 +360,7 @@ void CsoundHtmlWrapper::stop(){
     if (!m_csoundEngine) {
         return;
     }
-    qDebug();
+    //qDebug();
     m_csoundEngine->stop();
 }
 
@@ -398,7 +402,7 @@ int CsoundHtmlWrapper::checkCsound() // checks if CsoundEngine and CsoundOptions
 		csound = m_csoundEngine->getCsound();
 		return ret;
 	}
-	return -4; // if it arrives here at all
+    return 0; // if it arrives here, report success
 }
 
 

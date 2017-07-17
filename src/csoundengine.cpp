@@ -890,8 +890,8 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
     csoundSetKillGraphCallback(ud->csound, &CsoundEngine::killGraphCallback);
     csoundSetExitGraphCallback(ud->csound, &CsoundEngine::exitGraphCallback);
 
-    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! reuired change in Basedocument -  set options for CsoundEngine if html on init, not only on run
-        qDebug()<<"This is html file. Setting options CsoundOptions. here"; // TODO: filename not set here...
+    if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) {
+        qDebug()<<"This is html file. Setting options CsoundOptions. here";
         foreach (QString flag, m_options.generateCmdLineFlagsList() ) {
             int ret = csoundSetOption(ud->csound, flag.toLocal8Bit());
         }
