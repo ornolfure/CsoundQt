@@ -44,7 +44,7 @@
 CsoundEngine::CsoundEngine(ConfigLists *configlists) :
 	m_options(configlists)
 {
-	QMutexLocker locker(&m_playMutex);
+    QMutexLocker locker(&m_playMutex);
 	ud = new CsoundUserData();
 	ud->csEngine = this;
 	ud->csound = NULL;
@@ -431,7 +431,6 @@ void CsoundEngine::csThread(void *data)
 	if (!(udata->flags & QCS_NO_COPY_BUFFER)) {
 		MYFLT *outputBuffer = csoundGetSpout(udata->csound);
 		for (int i = 0; i < udata->outputBufferSize*udata->numChnls; i++) {
-            if (outputBuffer) // added for html
                 udata->audioOutputBuffer.put(outputBuffer[i]/ udata->zerodBFS);
 		}
 	}
@@ -888,9 +887,9 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
     csoundSetExitGraphCallback(ud->csound, &CsoundEngine::exitGraphCallback);
 
     if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) {
-        qDebug()<<"This is html file. Setting options CsoundOptions. here";
+        qDebug()<<"This is html file. Setting options CsoundOptions.";
         foreach (QString flag, m_options.generateCmdLineFlagsList() ) {
-            int ret = csoundSetOption(ud->csound, flag.toLocal8Bit());
+            csoundSetOption(ud->csound, flag.toLocal8Bit());
         }
     }
     // performance thread must be created in seprate function
@@ -900,7 +899,7 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
 int CsoundEngine::startPerformanceThread()
 {
     if (m_options.fileName1.endsWith(".html", Qt::CaseInsensitive)) { //NB! options not set if play() is not called with options => wrapper must know this.
-        qDebug()<<"csoundStart() must be called from javascript, not here.";
+        qDebug()<<"NB! csound.start()  must be called from javascript after this, compilation functions probably before it.";
         //ud->result = csoundStart(ud->csound); // html must habe been done compilation from here already;
         // how to check check, if already running
 
@@ -1118,7 +1117,7 @@ void CsoundEngine::stopCsound()
 {
 	//  qDebug() ;
 	//    perfThread->ScoreEvent(0, 'e', 0, 0);
-	m_playMutex.lock();
+    m_playMutex.lock();
 	if (ud->perfThread) {
 		CsoundPerformanceThread *pt = ud->perfThread;
 		ud->perfThread = NULL;
@@ -1128,13 +1127,13 @@ void CsoundEngine::stopCsound()
 		pt->Join();
 		qDebug()  << "Joined.";
 		delete pt;
-		m_playMutex.unlock();
+        m_playMutex.unlock();
 		cleanupCsound();
 #ifdef QCS_DEBUGGER
 		stopDebug();
 #endif
 	} else {
-		m_playMutex.unlock();
+        m_playMutex.unlock();
 	}
 #ifdef MACOSX_PRE_SNOW
 	// Put menu bar back

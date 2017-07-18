@@ -44,15 +44,21 @@ void CsoundHtmlWrapper::setCsoundEngine(CsoundEngine *csEngine, CsoundOptions *o
 	if (m_csoundEngine) {
         csound = m_csoundEngine->getCsound();
         m_options = options;
+        qDebug()<<"options for file: "<<m_options->fileName1;
     }
 }
 
 int CsoundHtmlWrapper::compileCsd(const QString &filename) {
-    if (!csound) {
-        return -1;        
+    if (checkCsound()) {
+        return -1;
     }
 #if CS_APIVERSION>=4
-    return csoundCompileCsd(csound, filename.toLocal8Bit());
+    int result = csoundCompileCsd(csound, filename.toLocal8Bit()); // also this returns 0 even if there are errors in csd
+    if (result!=CSOUND_SUCCESS) {
+        qDebug()<<"Failed to compile.";
+        m_csoundEngine->stop();
+    }
+    return result;
 #else
     return csoundCompileCsd(csound, filename.toLocal8Bit().data());
 #endif
@@ -63,7 +69,14 @@ int CsoundHtmlWrapper::compileCsdText(const QString &text) {
     if (checkCsound()) {
 		return -1;
     }
-    return csoundCompileCsdText(csound, text.toLocal8Bit());
+    int result = csoundCompileCsdText(csound, text.toLocal8Bit()); // somehow this is alwasy 0???
+//    if (result!=CSOUND_SUCCESS) { // later separate function in CsoundEngine compilationFailed()
+//        qDebug()  << "Csound compile failed! "  << result;
+//        m_csoundEngine->stop();
+//        //emit (errorLines(getErrorLines()));
+//        return result;
+//    }
+    return result;
 }
 
 int CsoundHtmlWrapper::compileOrc(const QString &text) {
@@ -239,8 +252,6 @@ int CsoundHtmlWrapper::readScore(const QString &text) {
 		return -1;
 	}  
     qDebug();
-    // if html only, needs to pass a message to engine
-    //m_csoundEngine->queueEvent(text.toLocal8Bit());
     return csoundReadScore(csound, text.toLocal8Bit());
 }
 
@@ -249,6 +260,7 @@ void CsoundHtmlWrapper::reset() {
         return;
     }
     // maybe even better:
+    //m_csoundEngine->stop(); // calls cleanup and everything needed ?
     m_csoundEngine->cleanupCsound();
     // in this point m_CsoundEngine can be already 0...
     //this seems to fail: csoundReset(m_csoundEngine->getCsound());
@@ -356,6 +368,7 @@ int CsoundHtmlWrapper::start()
     if (!csound) {
         return -1;
     }
+
     return csoundStart(csound);
 }
 
@@ -401,6 +414,7 @@ int CsoundHtmlWrapper::checkCsound() // checks if CsoundEngine and CsoundOptions
 	}
 	if (!m_csoundEngine->getCsound()) {
         qDebug()<<"Prepare Csound for compilation...";
+        qDebug()<<"Current filename is: "<<m_options->fileName1;
 		int ret =m_csoundEngine->prepareCsound(m_options); // coundCreate() is executed here
 		csound = m_csoundEngine->getCsound();
 		return ret;

@@ -394,10 +394,15 @@ void CsoundQt::changePage(int index)
             curCsdPage = curPage;
         }
     }
+
+    // added here for passing correct fileName to CsoundEngine if it is a html file and CsoundQt::run is not called
+    // may break cases where there are sco and orc separately but probably not.
+    m_options->fileName1 = documentPages[curPage]->getFileName();
+
 #if defined(QCS_QTHTML)
     // NB! this may have caused the crash on exit on windows!
     if (!documentPages.isEmpty()) {
-		updateHtmlView();
+        updateHtmlView(); //maybe also reset csoundEngine && options here
 	}
 #endif
     m_inspectorNeedsUpdate = true;
@@ -5070,9 +5075,9 @@ bool CsoundQt::makeNewPage(QString fileName, QString text)
     documentPages.insert(insertPoint, newPage);
     //  documentPages[curPage]->setOpcodeNameList(m_opcodeTree->opcodeNameList());
 	documentPages[curPage]->showLiveEventControl(false);
-    if (fileName.endsWith(".html", Qt::CaseInsensitive)) { // otherwise it will not be set for html files for CsoundEngine
-        m_options->fileName1 = fileName;
-    }
+//    if (fileName.endsWith(".html", Qt::CaseInsensitive)) { // otherwise it will not be set for html files for CsoundEngine
+//        m_options->fileName1 = fileName;
+//    } // probably not necessary since changePage sets it
     setCurrentOptionsForPage(documentPages[curPage]);
 
     documentPages[curPage]->setFileName(fileName);  // Must set before sending text to set highlighting mode
