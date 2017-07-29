@@ -26,6 +26,7 @@
 #include "csoundhtmlwrapper.h"
 #include <QApplication>
 #include <QDebug>
+#include <QFile>
 
 CsoundHtmlWrapper::CsoundHtmlWrapper(QObject *parent) :
     QObject(parent),
@@ -66,17 +67,33 @@ int CsoundHtmlWrapper::compileCsd(const QString &filename) {
 
 int CsoundHtmlWrapper::compileCsdText(const QString &text) {
 
-    if (checkCsound()) {
+	if (checkCsound()) {
 		return -1;
-    }
-    int result = csoundCompileCsdText(csound, text.toLocal8Bit()); // somehow this is alwasy 0???
-//    if (result!=CSOUND_SUCCESS) { // later separate function in CsoundEngine compilationFailed()
-//        qDebug()  << "Csound compile failed! "  << result;
-//        m_csoundEngine->stop();
-//        //emit (errorLines(getErrorLines()));
-//        return result;
-//    }
-    return result;
+	}
+	int result = -1;
+	int version = csoundGetVersion();
+	if (csoundGetVersion()<=6091 )  { // to work around bug in 6.09.1 where csoundCompileCsdText was always 1:
+
+		QString newName = "/tmp/temp-html-csd.csd";//m_options->fileName1+"-temp.csd"; // TODO: handle :/example beginning
+		QFile tempCsd(newName);
+		if (!tempCsd.open(QIODevice::WriteOnly| QIODevice::Text)) {
+			qDebug()<<"Csould not open file";
+			return -1;
+		}
+		tempCsd.write(text.toLocal8Bit());
+		tempCsd.close();
+		m_csoundEngine->prepareCsound(m_options);
+
+		result = m_csoundEngine->compileCsd(newName);
+	} else {
+		result = csoundCompileCsdText(csound, text.toLocal8Bit());
+		if (result!=CSOUND_SUCCESS) { // later separate function in CsoundEngine compilationFailed()
+			qDebug()  << "Csound compile failed! "  << result;
+			m_csoundEngine->stop();
+			//emit (errorLines(getErrorLines()));
+		}
+	}
+	return result;
 }
 
 int CsoundHtmlWrapper::compileOrc(const QString &text) {

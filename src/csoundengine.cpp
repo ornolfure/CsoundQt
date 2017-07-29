@@ -893,7 +893,42 @@ int CsoundEngine::prepareCsound(CsoundOptions *options) // first half of runCoun
         }
     }
     // performance thread must be created in seprate function
-    return 0;
+	return 0;
+}
+
+int CsoundEngine::compileCsd(QString filename)
+{
+#if CS_APIVERSION>=4
+	char const **argv;// since there was change in Csound API
+	argv = (const char **) calloc(33, sizeof(char*));
+#else
+	char **argv;
+	argv = (char **) calloc(33, sizeof(char*));
+#endif
+	// replace last parameter with the given filename
+	QString fileName1 = m_options.fileName1;
+	m_options.fileName1 = filename; // replace for compile
+	int argc = m_options.generateCmdLine((char **)argv);
+	m_options.fileName1 = fileName1;
+	qDebug()<<"Last argv line: "<< QString(argv[argc-1]);
+
+	ud->result=csoundCompile(ud->csound,argc,argv);
+	for (int i = 0; i < argc; i++) {
+		qDebug()  << argv[i];
+		free((char *) argv[i]);
+	}
+	free(argv);
+
+	if (ud->result!=CSOUND_SUCCESS) {
+		qDebug()  << "Csound compile failed! "  << ud->result;
+		//flushQueues seemd to hang..
+		//flushQueues(); // the line was here in some earlier version. Otherwise errormessaged won't be processed by Console::appendMessage()
+		//locker.unlock(); // otherwise csoundStop will freeze //NB! should we keep this mutex and set it in prepareCsound()
+		stop();
+		emit (errorLines(getErrorLines()));
+		return -3;
+	}
+	return ud->result;
 }
 
 int CsoundEngine::startPerformanceThread()

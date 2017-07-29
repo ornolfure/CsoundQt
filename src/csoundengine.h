@@ -238,6 +238,7 @@ public:
 	int runCsound();
 	void stopCsound();
     int prepareCsound(CsoundOptions *options);
+	int compileCsd(QString filename); // added for workaround of bug in Csound 6.09.1 where csoundCompileCsd return value is not correct;
     int startPerformanceThread();
     //void setCsoundOptions(CsoundOptions *options);
 

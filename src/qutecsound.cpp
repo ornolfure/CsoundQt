@@ -397,7 +397,8 @@ void CsoundQt::changePage(int index)
 
     // added here for passing correct fileName to CsoundEngine if it is a html file and CsoundQt::run is not called
     // may break cases where there are sco and orc separately but probably not.
-    m_options->fileName1 = documentPages[curPage]->getFileName();
+	if (!documentPages.isEmpty())
+		m_options->fileName1 = documentPages[curPage]->getFileName();
 
 #if defined(QCS_QTHTML)
     // NB! this may have caused the crash on exit on windows!
