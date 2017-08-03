@@ -68,7 +68,7 @@ f 0 3600
   <g>255</g>
   <b>255</b>
  </bgcolor>
- <bsbObject type="BSBButton" version="2">
+ <bsbObject version="2" type="BSBButton">
   <objectName>button0</objectName>
   <x>10</x>
   <y>19</y>
