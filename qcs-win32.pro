@@ -21,6 +21,8 @@ win32-msvc2013:build32: DEFAULT_CSOUND_LIBS = csound32.lib
 win32-msvc2013:build64: DEFAULT_CSOUND_LIBS = csound64.lib
 win32-msvc2015:build32: DEFAULT_CSOUND_LIBS = csound32.lib
 win32-msvc2015:build64: DEFAULT_CSOUND_LIBS = csound64.lib
+win32-msvc2017:build32: DEFAULT_CSOUND_LIBS = csound32.lib
+win32-msvc2017:build64: DEFAULT_CSOUND_LIBS = csound64.lib
 
 DEFAULT_PYTHON_INCLUDE_DIRS = "$$(HOMEDRIVE)\\Python26\\include"
 DEFAULT_PYTHONQT_SRC_DIRS = "$$(PROGRAMFILES)\\PythonQt"
@@ -31,6 +33,7 @@ include(config.pri)
 # Use results from config step
 win32-msvc2013: INCLUDEPATH += $${PTHREAD_INCLUDE_DIR} $${DEFAULT_LIBSNDFILE_INCLUDE_DIRS}
 win32-msvc2015: INCLUDEPATH += $${PTHREAD_INCLUDE_DIR} $${DEFAULT_LIBSNDFILE_INCLUDE_DIRS}
+win32-msvc2017: INCLUDEPATH += $${PTHREAD_INCLUDE_DIR} $${DEFAULT_LIBSNDFILE_INCLUDE_DIRS}
 RC_FILE = "src/qutecsound.rc"
 LCSOUND = "$${CSOUND_LIBRARY_DIR}/$${CSOUND_LIB}"
 win32-g++:csound6: LCSND = "$${CSOUND_LIBRARY_DIR}/csnd6.dll"
@@ -40,6 +43,7 @@ DEFINES += __WINDOWS_MM__
 win32-g++:LIBS += -lwinmm
 win32-msvc2013:LIBS += winmm.lib
 win32-msvc2015:LIBS += winmm.lib
+win32-msvc2017:LIBS += winmm.lib
 }
 
 quteapp_f {
@@ -55,3 +59,4 @@ RESOURCES += "src/quteapp_d_win.qrc"
 win32-g++:LIBS *= -lole32
 win32-msvc2013:LIBS *= ole32.lib
 win32-msvc2015:LIBS *= ole32.lib
+win32-msvc2017:LIBS *= ole32.lib
