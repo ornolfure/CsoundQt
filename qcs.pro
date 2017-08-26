@@ -82,6 +82,11 @@ greaterThan(QT_MAJOR_VERSION, 4): greaterThan (QT_MINOR_VERSION, 7) {
         CONFIG += QCS_QT58
 }
 
+greaterThan(QT_MAJOR_VERSION, 5): greaterThan (QT_MINOR_VERSION, 7) {
+        DEFINES += USE_QT_GT_59
+        CONFIG += QCS_QT59
+}
+
 buildDoubles: message("Doubles is now built by default, no need to specify buildDoubles option")
 
 !build32: CONFIG += build64
