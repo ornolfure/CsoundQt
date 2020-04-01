@@ -282,8 +282,6 @@ void Highlighter::setTheme(const QString &theme) {
     jsKeywordFormat = keywordFormat;
 
     m_theme = theme;
-    //was: emit this->rehighlight();
-    //correct:
     rehighlight();
 }
 

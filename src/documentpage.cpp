@@ -1674,7 +1674,9 @@ void DocumentPage::setHighlightingTheme(QString theme) {
     if(m_view == nullptr)
         return;
     m_colorTheme = theme;
+    bool modified = isModified(); // since setTheme -> rehighlight marks document always modified
     m_view->setTheme(theme);
+    setModified(modified);
     auto defaultFormat = m_view->getDefaultFormat();
     this->setEditorColors(defaultFormat.foreground().color(),
                           defaultFormat.background().color());

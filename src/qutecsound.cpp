@@ -2723,7 +2723,7 @@ void CsoundQt::about()
     About *msgBox = new About(this);
     msgBox->setWindowFlags(msgBox->windowFlags() | Qt::FramelessWindowHint);
     QString text ="<h1>";
-    text += tr("by: Andres Cabrera, Tarmo Johannes and others") +"</h1><h2>",
+    text += tr("by: Andres Cabrera, Tarmo Johannes, Eduardo Moguillansky and others") +"</h1><h2>",
             text += tr("Version %1").arg(QCS_VERSION) + "</h2><h2>";
     text += tr("Released under the LGPLv2 or GPLv3") + "</h2>";
     text += tr("Using Csound version:") + QString::number(csoundGetVersion()) + " ";
@@ -5636,7 +5636,8 @@ bool CsoundQt::makeNewPage(QString fileName, QString text)
     documentPages.insert(insertPoint, newPage);
     //  documentPages[curPage]->setOpcodeNameList(m_opcodeTree->opcodeNameList());
     documentPages[curPage]->showLiveEventControl(false);
-    setCurrentOptionsForPage(documentPages[curPage]);
+    // TARMO: try commenting one of the two setCurrentOptionsForPage out, seems to work
+    //setCurrentOptionsForPage(documentPages[curPage]);
 
     // Must set before sending text to set highlighting mode
     documentPages[curPage]->setFileName(fileName);
