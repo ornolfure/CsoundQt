@@ -282,7 +282,9 @@ void Highlighter::setTheme(const QString &theme) {
     jsKeywordFormat = keywordFormat;
 
     m_theme = theme;
-    emit this->rehighlight();
+    //was: emit this->rehighlight();
+    //correct:
+    rehighlight();
 }
 
 QTextCharFormat Highlighter::getFormat(QString tag) {
