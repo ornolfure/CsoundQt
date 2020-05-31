@@ -62,6 +62,15 @@ DockHelp::DockHelp(QWidget *parent)
     ui->label->setVisible(false);
     ui->nextFindButton->setVisible(false);
     ui->previousFindButton->setVisible(false);
+
+	// test icons:
+	ui->homeToolButton->setIcon(this->style()->standardIcon(QStyle::SP_DirHomeIcon));
+	//ui->toggleFindButton->setIcon( QIcon(":/themes/breeze-dark/edit-find.png") ) ; // TODO: light ? -> breeze // dark ->breeze-dark // now set to edit-find in designer -  probably does not work on MacOS/Windows
+	ui->backButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowLeft));
+	ui->previousFindButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowLeft));
+	ui->forwardButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowRight));
+	ui->nextFindButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowRight));
+
 }
 
 DockHelp::~DockHelp()
