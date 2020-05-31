@@ -1256,6 +1256,9 @@ void CsoundQt::setColors()
 	// maybe define dark and light palette in types.h as a class getPalette(light|dark)
 	//NB! from https://doc.qt.io/qt-5/qapplication.html#setPalette
 	// Warning: Do not use this function in conjunction with Qt Style Sheets. When using style sheets, the palette of a widget can be customized using the "color", "background-color", "selection-color", "selection-background-color" and "alternate-background-color".
+
+	// seems that palette  DOES NOT work on MacOS
+
 	QPalette lightPalette, darkPalette;
 
 	// temporary: get values out system palette:
@@ -1322,7 +1325,9 @@ lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
         lightPalette.setColor(QPalette::Highlight, QColor("#3daee9"));
 		lightPalette.setColor(QPalette::HighlightedText, "#fcfcfc");
 
-		qApp->setPalette(lightPalette);
+		//qApp->setPalette(lightPalette);
+		//test:
+		qApp->setStyleSheet("QMainWindow {color: blue; background-color: yellow}");  // kind of works
 
 		bgColor = lightPalette.color(QPalette::Base);
 		color = lightPalette.color(QPalette::Text);
