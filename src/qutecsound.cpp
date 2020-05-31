@@ -1247,29 +1247,99 @@ void CsoundQt::setupEnvironment()
 
 void CsoundQt::setColors()
 {
-	QPalette palette = QGuiApplication::palette();
+	QPalette palette = this->style()->standardPalette();//QGuiApplication::palette();
 	QColor color, bgColor;
 	QColor darkColor("#2b2b2b"), lightColor("#ececec");
 	bool isLight = true;
     bool systemIsDark = (palette.color(QPalette::Text).lightness() >  palette.color(QPalette::Window).lightness());
+	
+	// maybe define dark and light palette in types.h as a class getPalette(light|dark)
+	//NB! from https://doc.qt.io/qt-5/qapplication.html#setPalette
+	// Warning: Do not use this function in conjunction with Qt Style Sheets. When using style sheets, the palette of a widget can be customized using the "color", "background-color", "selection-color", "selection-background-color" and "alternate-background-color".
+	QPalette lightPalette, darkPalette;
 
-    if (m_options->colorScheme=="dark" ||
-            (m_options->colorScheme == "system" && systemIsDark )) {
-        bgColor = darkColor;
-        color = lightColor;
-        isLight = false;
+	// temporary: get values out system palette:
+	qDebug() << "SYETEM PALETTE\nWindow: " << palette.color(QPalette::Window).name()
+	         << "\nWindowText: " << palette.color(QPalette::WindowText).name()
+	         << "\nBase: " << palette.color(QPalette::Base).name()
+	         << "\nAlternateBase: " << palette.color(QPalette::AlternateBase).name()
+	         << "\nToolTipBase: " << palette.color(QPalette::ToolTipBase).name()
+	         << "\nToolTipText: " << palette.color(QPalette::ToolTipText).name()
+	         << "\nText: " << palette.color(QPalette::Text).name()
+	         << "\nButton: " << palette.color(QPalette::Button).name()
+	         << "\nButtonText: " << palette.color(QPalette::ButtonText).name()
+	         << "\nBrightText: " << palette.color(QPalette::BrightText).name()
+	         << "\nLink: " << palette.color(QPalette::Link).name()
+	         << "\nLinkVisited: " << palette.color(QPalette::LinkVisited).name()
+	         << "\nHighlight: " << palette.color(QPalette::Highlight).name()
+	         << "\nHighlightedText: " <<				palette.color(QPalette::HighlightedText).name()
+	            ;
 
-    } else {
-        bgColor = QColor(240,240,240);
-        color = QColor(Qt::black);
-        isLight = true;
+	if (m_options->colorScheme == "system") {
+		palette = this->style()->standardPalette();
+		qApp->setPalette(palette);
+		//qApp->setStyle(QStyleFactory::create("Fusion"));
+		qApp->setStyleSheet("");
+		color = palette.color(QPalette::Text);
+		bgColor = palette.color(QPalette::Base);//systemIsDark ? darkColor : lightColor;
+	} else if (m_options->colorScheme=="dark") {
+		// see also: https://gist.github.com/QuantumCD/6245215
+		QPalette darkPalette;
+		darkPalette.setColor(QPalette::Window, QColor(53,53,53));
+		darkPalette.setColor(QPalette::WindowText, Qt::white);
+		darkPalette.setColor(QPalette::Base, QColor(25,25,25));
+		darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+		darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+		darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+		darkPalette.setColor(QPalette::Text, Qt::white);
+		darkPalette.setColor(QPalette::Button, QColor(53,53,53));
+		darkPalette.setColor(QPalette::ButtonText, Qt::white);
+		darkPalette.setColor(QPalette::BrightText, Qt::red);
+		darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+
+		darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+		darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+		qApp->setPalette(darkPalette);
+		qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"); // not sure if this is necessary
+		bgColor = darkPalette.color(QPalette::Base);
+		color = darkPalette.color(QPalette::Text);
+		isLight = false;
+	} else {
+		// light
+		lightPalette.setColor(QPalette::Window, QColor("#eff0f1"));
+		lightPalette.setColor(QPalette::WindowText, QColor("#232627"));
+		lightPalette.setColor(QPalette::Base, QColor("#fcfcfc"));
+		lightPalette.setColor(QPalette::AlternateBase, QColor("#eff0f1"));
+		lightPalette.setColor(QPalette::ToolTipBase, QColor("#232627"));
+		lightPalette.setColor(QPalette::ToolTipText, QColor("#fcfcfc"));
+		lightPalette.setColor(QPalette::Text, QColor("#232627"));
+		lightPalette.setColor(QPalette::Button, QColor("#eff0f1"));
+		lightPalette.setColor(QPalette::ButtonText, QColor("#232627"));
+		lightPalette.setColor(QPalette::BrightText, QColor("#ffffff"));
+		lightPalette.setColor(QPalette::Link, QColor("#2980b9"));
+lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
+        lightPalette.setColor(QPalette::Highlight, QColor("#3daee9"));
+		lightPalette.setColor(QPalette::HighlightedText, "#fcfcfc");
+
+		qApp->setPalette(lightPalette);
+
+		bgColor = lightPalette.color(QPalette::Base);
+		color = lightPalette.color(QPalette::Text);
+		isLight = true;
+
+		//qApp->setStyleSheet("QToolTip { color: #050505; background-color: #cacaca; border: 1px solid black; }");
+
     }
 
     // change icon theme to breeze-dark if breeze chosen but system or option is for dark
-    if (systemIsDark && m_options->theme == "breeze") {
+	if ( (systemIsDark || m_options->colorScheme=="dark") && m_options->theme == "breeze") { // this is not good way to set the theme for icons. rethink
         m_options->theme = "breeze-dark";
-    } else if (!systemIsDark && m_options->theme == "breeze-dark") {
+		//test
+		//controlToolBar->update();
+	} else if ( (!systemIsDark || m_options->colorScheme=="light" ) && m_options->theme == "breeze-dark") {
         m_options->theme = "breeze";
+		//controlToolBar->update();
     }
 
     m_options->commonFontColor = color;
@@ -1279,12 +1349,15 @@ void CsoundQt::setColors()
 	m_inspector->setStyleSheet(QString("QTreeWidget { background-color: %1; color: %2}").arg(bgColor.name()).arg(color.name()));
 	m_inspector->setColors(isLight);
 	m_scratchPad->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()));
+	m_scratchPad->update();
+	//test - make help
+	//helpPanel->setPalette(lightPalette); // did not work
+	//widgetPanel->setPalette(lightPalette);
+
 
 #ifdef QCS_PYTHONQT
     m_pythonConsole->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()) );
 #endif
-
-
 }
 
 void CsoundQt::onNewConnection()
