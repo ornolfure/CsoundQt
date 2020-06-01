@@ -1247,7 +1247,7 @@ void CsoundQt::setupEnvironment()
 
 void CsoundQt::setColors()
 {
-	QPalette palette = this->style()->standardPalette();//QGuiApplication::palette();
+    QPalette palette = QGuiApplication::palette();//this->style()->standardPalette();//QGuiApplication::palette();
 	QColor color, bgColor;
 	QColor darkColor("#2b2b2b"), lightColor("#ececec");
 	bool isLight = true;
@@ -1277,14 +1277,19 @@ void CsoundQt::setColors()
 	         << "\nHighlight: " << palette.color(QPalette::Highlight).name()
 	         << "\nHighlightedText: " <<				palette.color(QPalette::HighlightedText).name()
 	            ;
+#ifdef Q_OS_WIN
+    qApp->setStyle(QStyleFactory::create("Fusion"));  // necessary for setting the palette properly
+#endif
 
 	if (m_options->colorScheme == "system") {
-		palette = this->style()->standardPalette();
-		qApp->setPalette(palette);
+        palette = QGuiApplication::palette(); //this->style()->standardPalette(); // standardPalette gives wrong colors on MacOS (light)
+        qApp->setPalette(palette);
 		//qApp->setStyle(QStyleFactory::create("Fusion"));
-		qApp->setStyleSheet("");
+        //qApp->setStyleSheet("");
+        isLight = !systemIsDark;
 		color = palette.color(QPalette::Text);
 		bgColor = palette.color(QPalette::Base);//systemIsDark ? darkColor : lightColor;
+        qDebug() << "Setting colorss system is dark: " << systemIsDark << color.name() << bgColor.name();
 	} else if (m_options->colorScheme=="dark") {
 		// see also: https://gist.github.com/QuantumCD/6245215
 		QPalette darkPalette;
@@ -1302,8 +1307,7 @@ void CsoundQt::setColors()
 
 		darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
 		darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-
-		qApp->setPalette(darkPalette);
+        qApp->setPalette(darkPalette);
 		qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"); // not sure if this is necessary
 		bgColor = darkPalette.color(QPalette::Base);
 		color = darkPalette.color(QPalette::Text);
@@ -1325,9 +1329,9 @@ lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
         lightPalette.setColor(QPalette::Highlight, QColor("#3daee9"));
 		lightPalette.setColor(QPalette::HighlightedText, "#fcfcfc");
 
-		//qApp->setPalette(lightPalette);
+        qApp->setPalette(lightPalette);
 		//test:
-		qApp->setStyleSheet("QMainWindow {color: blue; background-color: yellow}");  // kind of works
+        //qApp->setStyleSheet("QMainWindow {color: blue; background-color: yellow}");  // kind of works
 
 		bgColor = lightPalette.color(QPalette::Base);
 		color = lightPalette.color(QPalette::Text);
@@ -1338,13 +1342,12 @@ lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
     }
 
     // change icon theme to breeze-dark if breeze chosen but system or option is for dark
-	if ( (systemIsDark || m_options->colorScheme=="dark") && m_options->theme == "breeze") { // this is not good way to set the theme for icons. rethink
+    if ( ( (m_options->colorScheme=="system" && systemIsDark) || m_options->colorScheme=="dark")
+            && m_options->theme == "breeze") { // this is not good way to set the theme for icons. rethink
         m_options->theme = "breeze-dark";
-		//test
-		//controlToolBar->update();
-	} else if ( (!systemIsDark || m_options->colorScheme=="light" ) && m_options->theme == "breeze-dark") {
+    } else if ( (  (m_options->colorScheme=="system" && !systemIsDark) || m_options->colorScheme=="light" )
+                && m_options->theme == "breeze-dark") {
         m_options->theme = "breeze";
-		//controlToolBar->update();
     }
 
     m_options->commonFontColor = color;
@@ -1355,10 +1358,12 @@ lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
 	m_inspector->setColors(isLight);
 	m_scratchPad->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()));
 	m_scratchPad->update();
-	//test - make help
-	//helpPanel->setPalette(lightPalette); // did not work
-	//widgetPanel->setPalette(lightPalette);
 
+    //TODO: helpPanel needs somewhat lighter background
+    helpPanel->setStyleSheet(QString("QTextEdit { background-color: lightgrey; color: black }").arg(bgColor.name()).arg(color.name()));
+    //widgetPanel->setStyleSheet(QString("QDockWidget {background-color: darkgrey} ").arg(bgColor.name()).arg(color.name())); // think and check the colors by widgets (base/text etc from theme)...
+    widgetPanel->setPalette(lightPalette);
+    widgetPanel->update();
 
 #ifdef QCS_PYTHONQT
     m_pythonConsole->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()) );
@@ -3531,6 +3536,7 @@ void CsoundQt::createActions()
     // Actions that are not connected here depend on the active document, so they are
     // connected with connectActions() and are changed when the document changes.
     QString theme = m_options->theme;
+    qDebug() << "Icon theme: " << m_options->theme;
     QString prefix = ":/themes/" + theme + "/";
     newAct = new QAction(QIcon(prefix + "gtk-new.png"), tr("&New"), this);
     newAct->setStatusTip(tr("Create a new file"));
