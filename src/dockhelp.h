@@ -41,6 +41,7 @@ public:
 
 	bool hasFocus();
 	void loadFile(QString fileName);
+	void setIconsTheme(bool isLight);
 	bool externalBrowser;
 	QString docDir;
 

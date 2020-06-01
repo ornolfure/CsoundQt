@@ -128,5 +128,8 @@
         <file>themes/breeze-dark/br_next.png</file>
         <file>themes/breeze-dark/br_prev.png</file>
         <file>themes/breeze-dark/go-home-16.png</file>
+        <file>themes/breeze/br_next.png</file>
+        <file>themes/breeze/br_prev.png</file>
+        <file>themes/breeze/go-home-16.png</file>
     </qresource>
 </RCC>

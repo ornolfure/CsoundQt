@@ -62,21 +62,6 @@ DockHelp::DockHelp(QWidget *parent)
     ui->label->setVisible(false);
     ui->nextFindButton->setVisible(false);
     ui->previousFindButton->setVisible(false);
-
-	// set proper icons for dark/light theme
-	// icons for normal (light) theme are defined in ui file
-	// light icons for dark theme must be in folder theme/breeze-dark
-	bool isDarkTheme = this->palette().color(QPalette::Text).lightness() > this->palette().color(QPalette::Window).lightness() ;
-	if (isDarkTheme) {
-		QString prefix  = QString(":/themes/breeze-dark/");
-		ui->homeToolButton->setIcon(QIcon(prefix+"go-home-16.png"));
-
-		ui->toggleFindButton->setIcon( QIcon(prefix+ "edit-find.png") );
-		ui->backButton->setIcon(QIcon(prefix + "br_prev.png"));
-		ui->previousFindButton->setIcon(QIcon(prefix + "br_prev.png"));
-		ui->forwardButton->setIcon(QIcon(prefix + "br_next.png"));
-		ui->nextFindButton->setIcon(QIcon(prefix + "br_next.png"));
-	}
 }
 
 DockHelp::~DockHelp()
@@ -108,6 +93,25 @@ void DockHelp::loadFile(QString fileName)
 	ui->text->setSource(QUrl::fromLocalFile(fileName));
 #endif
 
+}
+
+void DockHelp::setIconsTheme(bool isLight)
+{
+	// set proper icons for dark/light theme
+	// icons for normal (light) theme are defined in ui file
+	// light icons for dark theme must be in folder theme/breeze-dark
+	// the problem is: proper palette is not set when this function is called;
+
+
+	QString prefix  = QString(":/themes/%1/").arg( isLight ? "breeze" : "breeze-dark" ) ;
+	ui->homeToolButton->setIcon(QIcon(prefix+"go-home-16.png"));
+
+	ui->toggleFindButton->setIcon( QIcon(prefix+ "edit-find.png") );
+	ui->backButton->setIcon(QIcon(prefix + "br_prev.png"));
+	ui->previousFindButton->setIcon(QIcon(prefix + "br_prev.png"));
+	ui->forwardButton->setIcon(QIcon(prefix + "br_next.png"));
+	ui->nextFindButton->setIcon(QIcon(prefix + "br_next.png"));
+	this->update();
 }
 
 void DockHelp::closeEvent(QCloseEvent * /*event*/)

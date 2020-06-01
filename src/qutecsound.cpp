@@ -1354,16 +1354,20 @@ lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
 	m_options->commonBgColor = bgColor;
     //qDebug()<< "Common font, background color: " << color.name() << bgColor.name();
 
+	// set editor's highlighting theme according to overall theme:
+	m_options->highlightingTheme = isLight ? "classic" : "dark";
+
 	m_inspector->setStyleSheet(QString("QTreeWidget { background-color: %1; color: %2}").arg(bgColor.name()).arg(color.name()));
 	m_inspector->setColors(isLight);
 	m_scratchPad->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()));
 	m_scratchPad->update();
 
     //TODO: helpPanel needs somewhat lighter background
-    helpPanel->setStyleSheet(QString("QTextEdit { background-color: lightgrey; color: black }").arg(bgColor.name()).arg(color.name()));
+	helpPanel->setStyleSheet(QString("QTextEdit { background-color: %1; color: black }").arg( isLight ? lightPalette.color(QPalette::Base).name() : "#eff0f1"  )); // TODO: find better colors
+	helpPanel->setIconsTheme(isLight);
     //widgetPanel->setStyleSheet(QString("QDockWidget {background-color: darkgrey} ").arg(bgColor.name()).arg(color.name())); // think and check the colors by widgets (base/text etc from theme)...
-    widgetPanel->setPalette(lightPalette);
-    widgetPanel->update();
+	//widgetPanel->setPalette(lightPalette);
+	//widgetPanel->update();
 
 #ifdef QCS_PYTHONQT
     m_pythonConsole->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()) );
