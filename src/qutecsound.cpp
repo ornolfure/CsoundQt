@@ -1282,14 +1282,14 @@ void CsoundQt::setColors()
 #endif
 
 	if (m_options->colorScheme == "system") {
-        palette = QGuiApplication::palette(); //this->style()->standardPalette(); // standardPalette gives wrong colors on MacOS (light)
+		palette = this->style()->standardPalette(); // standardPalette gives wrong colors on MacOS (light) and does not work on Windows.
         qApp->setPalette(palette);
 		//qApp->setStyle(QStyleFactory::create("Fusion"));
         //qApp->setStyleSheet("");
         isLight = !systemIsDark;
 		color = palette.color(QPalette::Text);
 		bgColor = palette.color(QPalette::Base);//systemIsDark ? darkColor : lightColor;
-        qDebug() << "Setting colorss system is dark: " << systemIsDark << color.name() << bgColor.name();
+		qDebug() << "Setting colors system is dark: " << systemIsDark << color.name() << bgColor.name();
 	} else if (m_options->colorScheme=="dark") {
 		// see also: https://gist.github.com/QuantumCD/6245215
 		QPalette darkPalette;
