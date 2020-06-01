@@ -63,14 +63,20 @@ DockHelp::DockHelp(QWidget *parent)
     ui->nextFindButton->setVisible(false);
     ui->previousFindButton->setVisible(false);
 
-	// test icons:
-	ui->homeToolButton->setIcon(this->style()->standardIcon(QStyle::SP_DirHomeIcon));
-	//ui->toggleFindButton->setIcon( QIcon(":/themes/breeze-dark/edit-find.png") ) ; // TODO: light ? -> breeze // dark ->breeze-dark // now set to edit-find in designer -  probably does not work on MacOS/Windows
-	ui->backButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowLeft));
-	ui->previousFindButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowLeft));
-	ui->forwardButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowRight));
-	ui->nextFindButton->setIcon(this->style()->standardIcon(QStyle::SP_ArrowRight));
+	// set proper icons for dark/light theme
+	// icons for normal (light) theme are defined in ui file
+	// light icons for dark theme must be in folder theme/breeze-dark
+	bool isDarkTheme = this->palette().color(QPalette::Text).lightness() > this->palette().color(QPalette::Window).lightness() ;
+	if (isDarkTheme) {
+		QString prefix  = QString(":/themes/breeze-dark/");
+		ui->homeToolButton->setIcon(QIcon(prefix+"go-home-16.png"));
 
+		ui->toggleFindButton->setIcon( QIcon(prefix+ "edit-find.png") );
+		ui->backButton->setIcon(QIcon(prefix + "br_prev.png"));
+		ui->previousFindButton->setIcon(QIcon(prefix + "br_prev.png"));
+		ui->forwardButton->setIcon(QIcon(prefix + "br_next.png"));
+		ui->nextFindButton->setIcon(QIcon(prefix + "br_next.png"));
+	}
 }
 
 DockHelp::~DockHelp()

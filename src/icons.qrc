@@ -125,5 +125,8 @@
         <file>themes/breeze-dark/pyroom.png</file>
         <file>themes/breeze-dark/render.png</file>
         <file>themes/breeze-dark/scratchpad.png</file>
+        <file>themes/breeze-dark/br_next.png</file>
+        <file>themes/breeze-dark/br_prev.png</file>
+        <file>themes/breeze-dark/go-home-16.png</file>
     </qresource>
 </RCC>

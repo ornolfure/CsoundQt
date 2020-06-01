@@ -103,7 +103,8 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset theme="edit-find"/>
+         <iconset>
+          <normaloff>../images/gtk-search.png</normaloff>../images/gtk-search.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
