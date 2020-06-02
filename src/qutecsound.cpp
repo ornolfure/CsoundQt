@@ -1280,11 +1280,17 @@ void CsoundQt::setColors()
 #ifdef Q_OS_WIN
     qApp->setStyle(QStyleFactory::create("Fusion"));  // necessary for setting the palette properly
 #endif
-
+    //try:
+    qDebug() << "Styles: " << QStyleFactory::keys();
+    //qApp->setStyle(QStyleFactory::create("Fusion")); // color change works ok with Fusion on MacOS, but look is too different
 	if (m_options->colorScheme == "system") {
-		palette = this->style()->standardPalette(); // standardPalette gives wrong colors on MacOS (light) and does not work on Windows.
+ #ifdef Q_OS_LINUX
+        palette =  this->style()->standardPalette();
+#else
+        palette = QGuiApplication::palette();  // standardPalette gives wrong colors on MacOS (light); does not work on and does not work on Windows.
+#endif
         qApp->setPalette(palette);
-		//qApp->setStyle(QStyleFactory::create("Fusion"));
+        //qApp->setStyle(QStyleFactory::create("Fusion"));
         //qApp->setStyleSheet("");
         isLight = !systemIsDark;
 		color = palette.color(QPalette::Text);
@@ -1293,9 +1299,9 @@ void CsoundQt::setColors()
 	} else if (m_options->colorScheme=="dark") {
 		// see also: https://gist.github.com/QuantumCD/6245215
 		QPalette darkPalette;
-		darkPalette.setColor(QPalette::Window, QColor(53,53,53));
+        darkPalette.setColor(QPalette::Window, QColor(53,53,53));
 		darkPalette.setColor(QPalette::WindowText, Qt::white);
-		darkPalette.setColor(QPalette::Base, QColor(25,25,25));
+        darkPalette.setColor(QPalette::Base, QColor(25,25,25));
 		darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
 		darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
 		darkPalette.setColor(QPalette::ToolTipText, Qt::white);
@@ -1307,14 +1313,16 @@ void CsoundQt::setColors()
 
 		darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
 		darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-        qApp->setPalette(darkPalette);
-		qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"); // not sure if this is necessary
+        //qApp->setPalette(darkPalette);
+        // if to use qStyleSheet for qApp then it loses tab close buttons (invisible)
+        // but otherwise ToolTib looks just white
+        //qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 		bgColor = darkPalette.color(QPalette::Base);
 		color = darkPalette.color(QPalette::Text);
 		isLight = false;
 	} else {
 		// light
-		lightPalette.setColor(QPalette::Window, QColor("#eff0f1"));
+        lightPalette.setColor(QPalette::Window, QColor("#eff0f1"));
 		lightPalette.setColor(QPalette::WindowText, QColor("#232627"));
 		lightPalette.setColor(QPalette::Base, QColor("#fcfcfc"));
 		lightPalette.setColor(QPalette::AlternateBase, QColor("#eff0f1"));
