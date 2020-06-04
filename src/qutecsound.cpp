@@ -1373,9 +1373,9 @@ lightPalette.setColor(QPalette::LinkVisited, QColor("#7f8c8d"));
     //TODO: helpPanel needs somewhat lighter background
 	helpPanel->setStyleSheet(QString("QTextEdit { background-color: %1; color: black }").arg( isLight ? lightPalette.color(QPalette::Base).name() : "#eff0f1"  )); // TODO: find better colors
 	helpPanel->setIconsTheme(isLight);
-    //widgetPanel->setStyleSheet(QString("QDockWidget {background-color: darkgrey} ").arg(bgColor.name()).arg(color.name())); // think and check the colors by widgets (base/text etc from theme)...
-	//widgetPanel->setPalette(lightPalette);
-	//widgetPanel->update();
+
+	// also light background to widget panel
+	widgetPanel->setStyleSheet(QString("QStackedWidget { background-color: %1; color: black } ").arg( isLight ? lightPalette.color(QPalette::Base).name() : "#eff0f1"  ));
 
 #ifdef QCS_PYTHONQT
     m_pythonConsole->setStyleSheet(QString("QTextEdit { background-color: %1; color:%2}").arg(bgColor.name()).arg(color.name()) );

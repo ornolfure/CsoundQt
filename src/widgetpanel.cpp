@@ -37,6 +37,11 @@ WidgetPanel::WidgetPanel(QWidget *parent)
 	m_stack->show();
 	setWidget(m_stack);
 
+	// try setting palette
+//	QPalette palette = this->palette();
+//	palette.setColor(QPalette::Base, Qt::green);
+//	this->setPalette(palette);
+
 	setMouseTracking(true);
 }
 
