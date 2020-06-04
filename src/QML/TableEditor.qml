@@ -10,11 +10,13 @@ import QtQuick.Dialogs 1.1
 Rectangle {
     id: mainWindow
     width: 720
-    height: 550
+    height: 600
     property var points: []; // array of endpoints of the segments
     property int pointWidth: 10; // set constant
     property real currentIndex: 0
     property real currentValue: 0
+    property string backgroundColor: "#f0f0f0"
+    color: backgroundColor
 
     Item {id: mainArea; anchors.fill: parent}
 
@@ -337,7 +339,7 @@ Rectangle {
             // TODO: how to rise above labels and other objects
             z:1
             opacity: 0.8
-            color: "#fbfcba"
+            color: mainWindow.backgroundColor //"#fbfcba"
             radius: 4
             visible: false
             border.width: 1
