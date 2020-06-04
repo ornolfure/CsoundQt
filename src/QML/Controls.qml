@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 
-Rectangle {
+Item {
     property int channel: channelSpinBox.value
     property int velocity: velocitySpinBox.value
     property int octave: octaveSpinBox.value
@@ -10,9 +10,9 @@ Rectangle {
     id: controls
     Layout.minimumHeight: channelSpinBox.height
     RowLayout {
-        spacing: 10
         anchors.fill: parent
-        Text {
+        spacing: 10
+        Label {
             text: qsTr("Channel")
         }
         SpinBox {
@@ -24,7 +24,7 @@ Rectangle {
             value: 1
             Keys.forwardTo: controls // to forward them further to keyboard to be able to play wrom computer keys
         }
-        Text {
+        Label {
             text: qsTr("Velocity")
         }
         SpinBox {
@@ -36,7 +36,7 @@ Rectangle {
             value: 64
             Keys.forwardTo: controls
         }
-        Text {
+        Label {
             text: qsTr("Octave")
         }
         SpinBox {
@@ -48,7 +48,7 @@ Rectangle {
             value: 5
             Keys.forwardTo: controls
         }
-        Text {
+        Label {
             text: qsTr("Num Octaves")
         }
         SpinBox {
