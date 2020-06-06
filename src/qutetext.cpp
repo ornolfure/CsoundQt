@@ -233,7 +233,7 @@ void QuteText::applyInternalProperties()
 
     QString bgstr = property("QCS_bgcolormode").toBool() ?
         (QString("; background-color:")+property("QCS_bgcolor").value<QColor>().name()) :
-        QString("");
+		QString("");
 
     m_widget->setStyleSheet(
         "QLabel{ font-family:\"" + property("QCS_font").toString() + "\""
@@ -841,7 +841,7 @@ void QuteLineEdit::applyInternalProperties()
 	m_widget->setStyleSheet("QLineEdit { font-family:\"" + property("QCS_font").toString()
 							+ "\"; font-size: " + QString::number(new_fontSize)  + "pt"
 							+ (property("QCS_bgcolormode").toBool() ?
-								   QString("; background-color:") + property("QCS_bgcolor").value<QColor>().name() : QString("; "))
+								   QString("; background-color:") + property("QCS_bgcolor").value<QColor>().name() : QString("; background-color: white; ")) // was: QString("; ")
 							+ "; color:" + property("QCS_color").value<QColor>().name()
 							+ "; border-color:" + property("QCS_color").value<QColor>().name()
 							+ "; border-radius:" + QString::number(property("QCS_borderradius").toInt()) + "px"

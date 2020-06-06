@@ -321,12 +321,12 @@ void QuteSpinBox::applyInternalProperties()
 	}
     auto bgstr = property("QCS_bgcolormode").toBool() ?
         QString("background-color:")+property("QCS_bgcolor").value<QColor>().name()+";" :
-        QString("");
+		QString("background-color: white");  // was: QString("");or find suitable color according to text color
     auto sheet = QString(
         "QDoubleSpinBox {"
         "font-family: \"%1\";"
         "font-size: %2pt;"
-        "color: %3;"
+        "color: %3;"			
         "%4 }")
         .arg(property("QCS_font").toString())
         .arg(QString::number(new_fontSize))
