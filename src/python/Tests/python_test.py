@@ -4,10 +4,10 @@ from Tkinter import *
 root = Tk()
 
 t =  "Python Information\n"
-t += "executable: " + sys.executable + "\n"
-t += "version: " + sys.version + "\n"
-t += "prefix: " + sys.prefix + "\n"
-t += "exec_prefix: " + sys.exec_prefix + "\n"
+t += f"executable: {sys.executable}" + "\n"
+t += f"version: {sys.version}" + "\n"
+t += f"prefix: {sys.prefix}" + "\n"
+t += f"exec_prefix: {sys.exec_prefix}" + "\n"
 
 w = Label(root, text=t)
 w.pack()

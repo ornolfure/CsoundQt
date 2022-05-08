@@ -9,7 +9,7 @@ for line in lines:
     line = line.lstrip()
     els = line.split()
     if els and els[0] == "instr":
-       allinstrs = "%s %s" % (allinstrs, els[1])
+        allinstrs = f"{allinstrs} {els[1]}"
 print("instruments in this csd:")
 print('"' + allinstrs[1:] + '"')
 q.insertText('"' + allinstrs[1:] + '"')

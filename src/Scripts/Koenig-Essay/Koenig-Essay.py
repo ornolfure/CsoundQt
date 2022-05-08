@@ -28,9 +28,9 @@ def stop():
 def renderFile(csdFile):
     global srBox
     sr = srBox.currentText
-    ret = os.system("csound " + csdFile + " -d -r" + sr + " -k" + sr )
+    ret = os.system(f"csound {csdFile} -d -r{sr} -k{sr}")
     if ret != 0:
-        print("Error! File: " + csdFile + " returned: " + str(ret))
+        print(f"Error! File: {csdFile} returned: {str(ret)}")
     return ret
 
 def renderFiles():
@@ -44,8 +44,8 @@ def renderFiles():
     running = 1
     for csdFile in csdFiles:
         counter += 1
-        statusLabel.setText("Rendering:" + csdFile)
-        print("Rendering (" + str(counter) + "/" + str(number) + "):" + csdFile)
+        statusLabel.setText(f"Rendering:{csdFile}")
+        print(f"Rendering ({counter}/{number}):{csdFile}")
         renderFile(csdFile)
         pqtc.QCoreApplication.instance().processEvents() # Needed to avoid blocking the application
         if running == 0:
@@ -54,12 +54,12 @@ def renderFiles():
 
 def partChanged(index):
     global sectionBox, parts
-    wavFiles = glob.glob(renderDir + "/*.wav") # Get list of csd files
+    wavFiles = glob.glob(f"{renderDir}/*.wav")
     wavFiles.sort() # Sort the list alphabetically
     sectionBox.clear()
     initialIndex = len(renderDir) + 1
     initial = parts[index]
-    if parts[index] == "Complete":
+    if initial == "Complete":
         initial = "X"
     for file in wavFiles:
         if file[9] == initial:
@@ -72,7 +72,7 @@ def edit():
     if not os.access(name, os.F_OK):
         pqt.QMessageBox.warning(0, "Koenig-Essay", "Part has not been rendered!")
     else:
-        ret = os.system("audacity " + name + "&")
+        ret = os.system(f"audacity {name}&")
         if ret != 0:
             print("Error opening audacity")
 

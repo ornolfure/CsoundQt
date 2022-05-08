@@ -14,26 +14,24 @@ excpList = ('instr', 'endin', 'if', 'elseif', 'endif', 'opcode', 'endop', 'sr', 
 def exceptions(line, excptlis):
     """returns t if line starts with a word from excptlis"""
     firstWord = line.split()[0]
-    if firstWord in excptlis:
-        return True
-    else:
-        return False
+    return firstWord in excptlis
         
 def long_comment(line, prevState):
     """returns 1 if a '/* ...*/' comment is active, 0 otherwise"""
     if line.rstrip()[-2:] == '*/':
         return 0
-    elif line.lstrip()[0:2] == '/*':
+    elif line.lstrip()[:2] == '/*':
         return 1
     else:
         return prevState
         
 def comment(line, longComment):
     """returns t if line is a comment"""
-    if longComment == 1 or line.lstrip()[0] == ';' or line.rstrip()[-2:] == '*/':
-        return True
-    else:
-        return False
+    return (
+        longComment == 1
+        or line.lstrip()[0] == ';'
+        or line.rstrip()[-2:] == '*/'
+    )
 
 def listUdos(orcText):
     """list all udo names in orcText"""
@@ -56,11 +54,7 @@ def listUdos(orcText):
 def indent():
     selection = q.getSelectedText()  # Get current selection
     udoList = listUdos(q.getOrc())
-    if selection == "": # If no selection
-        orcText = q.getOrc() # use complete orc section
-    else:
-        orcText = selection
-
+    orcText = q.getOrc() if selection == "" else selection
     newOrcText = ""
     prev = 0 #initial value for long comment
     for line in orcText.splitlines():
@@ -83,25 +77,22 @@ def indent():
                         format = '%%-%ds%%s ' % space_left.value
                         newline = format % (newline, word)
                         opcdpos = space_left.value #new position of the opcode
-                    #opcode position stays at pos
                     else:
-                        newline = '%s%s ' % (newline, word)
+                        newline = f'{newline}{word} '
                     pos = opcdpos + len(word) + 1
                     firstarg = 1 #next word is the first argument
                     opcd = 1 #opcode has been already
-                #word is the first argument
                 elif firstarg == 1:
                     if pos - opcdpos < space_left.value and pos < space_right.value:
                         format = '%%-%ds%%s ' % space_right.value 
                         newline = format % (newline, word)
                         pos = space_right.value + len(word) + 1
                     else:
-                        newline = '%s%s ' % (newline, word)
+                        newline = f'{newline}{word} '
                         pos = pos + len(word) + 1
                     firstarg = 0 #reset 
-                #all other cases
                 else:
-                    newline = '%s%s ' % (newline, word)
+                    newline = f'{newline}{word} '
                     pos = pos + len(word) + 1
                     if opcd == 0:
                         opcdpos = pos

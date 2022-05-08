@@ -9,7 +9,7 @@ sys.path.append(os.getcwd()) # trick to allow importing python files from the cu
 def bytesong(PAT):
     stopsong()
     q.loadDocument('bytesong.csd')
-    options = '-m0 -odac --omacro:PAT=' + PAT
+    options = f'-m0 -odac --omacro:PAT={PAT}'
     q.setOptionsText(options)
     q.stop()
     q.play()

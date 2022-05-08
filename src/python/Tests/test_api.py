@@ -3,12 +3,12 @@ import qutesheet as q
 
 disp = ""
 
-disp += "first_col = " + str(q.first_col) + "\n"
-disp += "first_row = " + str(q.first_row) + "\n"
-disp += "num_rows = " + str(q.num_rows) + "\n"
-disp += "num_cols = " + str(q.num_cols) + "\n"
-disp += "total_rows = " + str(q.total_rows) + "\n"
-disp += "total_cols = " + str(q.total_cols) + "\n"
+disp += f"first_col = {str(q.first_col)}" + "\n"
+disp += f"first_row = {str(q.first_row)}" + "\n"
+disp += f"num_rows = {str(q.num_rows)}" + "\n"
+disp += f"num_cols = {str(q.num_cols)}" + "\n"
+disp += f"total_rows = {str(q.total_rows)}" + "\n"
+disp += f"total_cols = {str(q.total_cols)}" + "\n"
 
 disp += "\n"
 disp += "text() =\n"

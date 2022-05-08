@@ -9,7 +9,7 @@ def changeToChnget(text):
     channels = {}
     strchannels = {}
     for line in lines:
-        if line.count("invalue") > 0 :
+        if line.count("invalue") > 0:
             line = line.replace("invalue", "chnget")
             arg1Index = line.find("chnget") + 7
             arg1EndIndex = line.find(";", arg1Index)
@@ -25,12 +25,11 @@ def changeToChnget(text):
                     strchannels[arg1[1:-1]] |= 1
                 else:
                     strchannels[arg1[1:-1]] = 1
+            elif arg1[1:-1] in channels:
+                channels[arg1[1:-1]] |= 1
             else:
-                if arg1[1:-1] in channels:
-                    channels[arg1[1:-1]] |= 1
-                else:
-                    channels[arg1[1:-1]] = 1
-            # TODO accumulate channels
+                channels[arg1[1:-1]] = 1
+                    # TODO accumulate channels
         elif line.count("outvalue") > 0:
             line = line.replace("outvalue", "chnset")
             arg1Index = line.find("chnset") + 7
@@ -45,29 +44,28 @@ def changeToChnget(text):
                 line = line.replace("chnset", "outvalue") # put it back
                 newText += line + "\n"
                 continue
-            line = line[:arg1Index] + " " +  arg2 + ", " + arg1
+            line = f"{line[:arg1Index]} {arg2}, {arg1}"
             if (arg2EndIndex > 0):
-                line += " " + comment
+                line += f" {comment}"
             if arg2.strip().startswith('S') or arg2.strip().startswith('"'):
                 if arg1[1:-1] in channels:
                     strchannels[arg1[1:-1]] |= 2
                 else:
                     strchannels[arg1[1:-1]] = 2
+            elif arg1[1:-1] in channels:
+                channels[arg1[1:-1]] |= 2
             else:
-                if arg1[1:-1] in channels:
-                    channels[arg1[1:-1]] |= 2
-                else:
-                    channels[arg1[1:-1]] = 2
+                channels[arg1[1:-1]] = 2
         newText += line + "\n"
     chnText = ''
     index = 0
-    if len(channels) > 0 : # there are channels
+    if channels: # there are channels
         index = newText.find('opcode') # TODO use regex here to find start of line!
         if index < 0:
             index = newText.find('instr') # TODO use regex here to find start of line!
         for chan in sorted(channels):
             chnText += 'chn_k "' + chan + '", ' + str(channels[chan]) + '\n'
-    if len(strchannels) > 0 : # there are channels
+    if strchannels: # there are channels
         index = newText.find('instr') # TODO use regex here to find start of line!
         for chan in sorted(strchannels):
             chnText += 'chn_S "' + chan + '", ' + str(strchannels[chan]) + '\n'
@@ -90,9 +88,9 @@ def changeToInvalue(text):
             comment = line[arg2EndIndex :]
             arg1 = line[arg1Index : arg2Index - 1].strip()
             arg2 = line[arg2Index : arg2EndIndex].strip()
-            line = line[:arg1Index] + " " +  arg2 + ", " + arg1
+            line = f"{line[:arg1Index]} {arg2}, {arg1}"
             if (arg2EndIndex > 0):
-                line += " " + comment
+                line += f" {comment}"
         if not (line.strip().startswith('chn_k') or line.strip().startswith('chn_S')):
             newText += line + "\n" # skip lines with chn_k
     q.setOrc(newText)

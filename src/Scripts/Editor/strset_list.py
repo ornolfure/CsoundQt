@@ -13,10 +13,7 @@ def file_sel():
     files = pqt.QFileDialog.getOpenFileNames(w, "Select files for strset list")
 
 def paths():
-    datlis = []
-    for dat in files:
-        datlis.append(dat)
-    datlis.sort()
+    datlis = sorted(files)
     strset = startnum.value
     insert = ""
     for dat in datlis:
@@ -25,10 +22,7 @@ def paths():
     q.insertText(insert)
 
 def names():
-    datlis = []
-    for dat in files:
-        datlis.append(dat)
-    datlis.sort()
+    datlis = sorted(files)
     strset = startnum.value
     insert = ""
     for dat in datlis:

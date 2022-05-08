@@ -46,10 +46,10 @@ def knob(x, y):
     readout_y = y + default_size + gutter  # get property instead?
 
     # convert x_offset to centered property
-    knobLabel = q.createNewLabel(width * x + 5, label_y, "" + str(x + 1))
+    knobLabel = q.createNewLabel(width * x + 5, label_y, f"{str(x + 1)}")
     knobs_labels.append(knobLabel)
 
-    name = "knob" + str(x + 1)
+    name = f"knob{str(x + 1)}"
     newKnob = q.createNewKnob(width * x, knob_y, name)
     knobs.append(newKnob)
     invalue(name)
@@ -67,10 +67,10 @@ def fader(x, y):
     fader_y = label_y + 20
     readout_y = fader_y + 100  # get property instead?
 
-    faderLabel = q.createNewLabel(width * x + 5, label_y, "" + str(x + 1))
+    faderLabel = q.createNewLabel(width * x + 5, label_y, f"{str(x + 1)}")
     faders_labels.append(faderLabel)
 
-    name = "fader" + str(x + 1)
+    name = f"fader{str(x + 1)}"
     newFader = q.createNewSlider(width * x + 50, fader_y, name)
     faders.append(newFader)
     invalue(name)
@@ -88,17 +88,17 @@ def buttons(x, y):
     mute_y = solo_y + gutter
     rec_y = mute_y + gutter  # get property instead?
 
-    solo_name = "solo" + str(x + 1)
+    solo_name = f"solo{str(x + 1)}"
     newSolo = q.createNewButton(100 * x, solo_y, solo_name)
     solo.append(newSolo)
     invalue(solo_name)
 
-    mute_name = "mute" + str(x + 1)
+    mute_name = f"mute{str(x + 1)}"
     newMute = q.createNewButton(100 * x, mute_y, mute_name)
     mute.append(newMute)
     invalue(mute_name)
 
-    rec_name = "rec" + str(x + 1)
+    rec_name = f"rec{str(x + 1)}"
     newRec = q.createNewButton(100 * x, rec_y, rec_name)
     rec.append(newRec)
     invalue(rec_name)
