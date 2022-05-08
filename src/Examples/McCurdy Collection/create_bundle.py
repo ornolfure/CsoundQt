@@ -9,7 +9,7 @@ zfilename = "McCurdy Colection.zip"
 zout = zipfile.ZipFile(zfilename, "w")
 
 for dir in dirs:
-    files = glob.glob(dir + "/*")
+    files = glob.glob(f"{dir}/*")
     for f in files:
         zout.write(f)
 

@@ -18,9 +18,25 @@ def change_id(new_id, file_name):
 
 def adjust_link(old_link, new_link, app_name, bin_name, suffix = '64'):
 
-    change_id(new_link, app_name + '/Contents/Frameworks/' + new_link[new_link.rindex('/') + 1:])
-    change_link(old_link, new_link, app_name + '/Contents/Frameworks/CsoundLib%s.framework/Versions/5.2/CsoundLib%s'%(suffix, suffix))
-    change_link(old_link, new_link, app_name + '/Contents/Frameworks/CsoundLib%s.framework/Versions/5.2/lib_csnd.dylib'%suffix)
+    change_id(
+        new_link,
+        f'{app_name}/Contents/Frameworks/'
+        + new_link[new_link.rindex('/') + 1 :],
+    )
+
+    change_link(
+        old_link,
+        new_link,
+        app_name
+        + f'/Contents/Frameworks/CsoundLib{suffix}.framework/Versions/5.2/CsoundLib{suffix}',
+    )
+
+    change_link(
+        old_link,
+        new_link,
+        app_name
+        + f'/Contents/Frameworks/CsoundLib{suffix}.framework/Versions/5.2/lib_csnd.dylib',
+    )
     
 def copy_files(app_name, bin_name, doubles=True):
     suffix = '64' if doubles else ''
@@ -84,30 +100,45 @@ if (not os.path.exists('build')):
 os.chdir("build")
 qute_app_dir = 'bin/'
 qtbindir = '/Users/acabrera/QtSDK/Desktop/Qt/4.8.1/gcc/bin/'
-qmake = qtbindir + "qmake"
-macdeployqt = qtbindir + "macdeployqt"
+qmake = f"{qtbindir}qmake"
+macdeployqt = f"{qtbindir}macdeployqt"
 
 doubles = False
-os.system(qmake + " /Users/acabrera/src/qutecsound/trunk/qutecsound/QuteApp/QuteApp.pro -r -spec macx-g++ CONFIG+=release CONFIG+=buildFloats")
+os.system(
+    f"{qmake} /Users/acabrera/src/qutecsound/trunk/qutecsound/QuteApp/QuteApp.pro -r -spec macx-g++ CONFIG+=release CONFIG+=buildFloats"
+)
+
 #os.system("make clean")
 os.system("make -w")
 binary = 'QuteApp_' + ('d' if doubles else 'f')
 pdb.set_trace()
-os.system(macdeployqt + ' ' + qute_app_dir + binary + '.app')
+os.system(f'{macdeployqt} {qute_app_dir}{binary}.app')
 copy_files(qute_app_dir + binary + '.app', qute_app_dir + binary + '.app/Contents/MacOS/' + binary, doubles)
-if (os.path.exists(qute_app_dir + '../../../src/res/osx/' + binary + '.app')):
-    shutil.rmtree(qute_app_dir + '../../../src/res/osx/' + binary + '.app')
-shutil.copytree(qute_app_dir + binary + '.app', qute_app_dir + '../../../src/res/osx/' + binary + '.app' , symlinks=True )
+if os.path.exists(f'{qute_app_dir}../../../src/res/osx/{binary}.app'):
+    shutil.rmtree(f'{qute_app_dir}../../../src/res/osx/{binary}.app')
+shutil.copytree(
+    qute_app_dir + binary + '.app',
+    f'{qute_app_dir}../../../src/res/osx/{binary}.app',
+    symlinks=True,
+)
+
 
 doubles = True
-os.system(qmake + " /Users/acabrera/src/qutecsound/trunk/qutecsound/QuteApp/QuteApp.pro -r -spec macx-g++ CONFIG+=release CONFIG+=buildDoubles")
+os.system(
+    f"{qmake} /Users/acabrera/src/qutecsound/trunk/qutecsound/QuteApp/QuteApp.pro -r -spec macx-g++ CONFIG+=release CONFIG+=buildDoubles"
+)
+
 #os.system("make clean")
 os.system("make -w")
 binary = 'QuteApp_' + ('d' if doubles else 'f')
-os.system(macdeployqt + ' ' + qute_app_dir + binary + '.app')
+os.system(f'{macdeployqt} {qute_app_dir}{binary}.app')
 copy_files(qute_app_dir + binary + '.app', qute_app_dir + binary + '.app/Contents/MacOS/' + binary, doubles)
-if (os.path.exists(qute_app_dir + '../../../src/res/osx/' + binary + '.app')):
-    shutil.rmtree(qute_app_dir + '../../../src/res/osx/' + binary + '.app')
-shutil.copytree(qute_app_dir + binary + '.app', qute_app_dir + '../../../src/res/osx/' + binary + '.app' , symlinks=True )
+if os.path.exists(f'{qute_app_dir}../../../src/res/osx/{binary}.app'):
+    shutil.rmtree(f'{qute_app_dir}../../../src/res/osx/{binary}.app')
+shutil.copytree(
+    qute_app_dir + binary + '.app',
+    f'{qute_app_dir}../../../src/res/osx/{binary}.app',
+    symlinks=True,
+)
 
 

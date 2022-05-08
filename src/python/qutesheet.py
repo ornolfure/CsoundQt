@@ -8,7 +8,7 @@ majorversion = 1
 minorversion = 0
 subversion   = 0
 
-version_text = str(majorversion) + '.' + str(minorversion) + '.' + str(subversion)
+version_text = f'{majorversion}.{minorversion}.{subversion}'
 
 class InconsistentData(Exception):
     """Exception raised for errors in the input.
@@ -97,8 +97,8 @@ class QuteSheet:
             new_num_rows = self.num_rows
         if new_num_cols == -1:
             new_num_cols = self.num_cols
-        out_text = '__@ ' + str(new_first_row) + ' ' + str(new_first_col)
-        out_text += ' ' + str(new_num_rows) + ' ' + str(new_num_cols) + '\n'
+        out_text = f'__@ {str(new_first_row)} {str(new_first_col)}'
+        out_text += f' {str(new_num_rows)} {str(new_num_cols)}' + '\n'
         out_text += self._rows_to_text(new_data)
         self._write_out_file(out_text)
         sys.exit()
@@ -120,7 +120,7 @@ class QuteSheet:
         out_data = []
         for i in range(new_num_rows):
             out_data.append([])
-            for j in range(new_num_cols):
+            for _ in range(new_num_cols):
                 if len(new_data) > 0:
                     out_data[i].append(new_data.pop(0))
         set_rows(out_data, new_first_row, new_first_col, new_num_rows, new_num_cols)
@@ -139,8 +139,8 @@ U        print "Warning! set_cells_by_col() not implemented yet!"
             new_num_rows = self.num_rows
         if new_num_cols == -1:
             new_num_cols = self.num_cols
-        out_text = '__@ ' + str(new_first_row) + ' ' + str(new_first_col)
-        out_text += ' ' + str(new_num_rows) + str(new_num_cols) + '\n'
+        out_text = f'__@ {str(new_first_row)} {str(new_first_col)}'
+        out_text += f' {str(new_num_rows)}{str(new_num_cols)}' + '\n'
         out_text += text
         _write_out_file(out_text)
 
@@ -155,9 +155,10 @@ U        print "Warning! set_cells_by_col() not implemented yet!"
                 new_data.append(r)
             else:
                 count = 0
-                while count < len(new_data):
-                    if type(r[p_field]) != str and r[p_field] <= new_data[count][p_field]:
-                        break
+                while count < len(new_data) and not (
+                    type(r[p_field]) != str
+                    and r[p_field] <= new_data[count][p_field]
+                ):
                     count += 1
                 new_data.insert(count, r)
         return new_data
@@ -175,8 +176,7 @@ U        print "Warning! set_cells_by_col() not implemented yet!"
     def _get_cells_by_row(self, rows):
         cells = []
         for r in rows:
-            for c in r:
-                cells.append(c)
+            cells.extend(iter(r))
         return cells
 
     def _transpose(self, mtx):
@@ -185,33 +185,24 @@ U        print "Warning! set_cells_by_col() not implemented yet!"
     def _some_cols(self, data, row, num_rows, col, num_cols):
         rows = []
         for r in range(row, row + num_rows):
-            new_row = []
-            for c in range(col, col + num_cols):
-                new_row.append(data[r][c])
+            new_row = [data[r][c] for c in range(col, col + num_cols)]
             rows.append(new_row)
         return rows
 
     def _all_cols(self, data, row, num_rows):
-        rows = []
-        for r in range(row, row + num_rows):
-            rows.append(data[r])
-        return rows
+        return [data[r] for r in range(row, row + num_rows)]
 
     def _rows_to_text(self, rows):
         out_text = ""
         for row in rows:
             for cell in row:
-                if type(cell)==str:
-                    out_text += "" + cell + " "
-                else:
-                    out_text += str(cell) + " "
+                out_text += f"{cell} " if type(cell)==str else f"{str(cell)} "
             out_text += '\n'
         return out_text
 
     def _write_out_file(self, text):
-        f = open(self.out_filename, "w")
-        f.write(text);
-        f.close()
+        with open(self.out_filename, "w") as f:
+            f.write(text);
 
 #-----------------------------------------------------------------------------
 

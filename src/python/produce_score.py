@@ -158,14 +158,14 @@ def make_ly_text(rows, staff_name, quant, time, num_beats, p4):
                     sil_dur = 1
                     if remaining <= num_beats:
                         if modf(1.0/remaining)[0] != 0:
-                            sil_dur = str( int(8 * (1.0/remaining)) ) + "."
+                            sil_dur = f"{int(8 * (1.0/remaining))}."
                         else:
                             sil_dur = str( int(4 * (1.0/remaining)) )
                         remaining -= num_beats
                         if voice.index(r) == 0:
-                            ly_notes_text += 'r' + str(sil_dur) + ' '
+                            ly_notes_text += f'r{str(sil_dur)} '
                         else:
-                            ly_notes_text += 's' + str(sil_dur) + ' '
+                            ly_notes_text += f's{str(sil_dur)} '
                     else:
                         ly_notes_text += 's1 ~ '
                         remaining -= num_beats
@@ -184,16 +184,12 @@ def make_ly_text(rows, staff_name, quant, time, num_beats, p4):
             if p_class < 7.05 and not clef_changed:
                 note_text += " \\clef F "
                 clef_changed = True
-            else:
-                if p_class > 8.07 and clef_changed:
-                    note_text += " \\clef G "
-                    clef_changed = False
+            elif p_class > 8.07 and clef_changed:
+                note_text += " \\clef G "
+                clef_changed = False
             note_text += note_names[int(note_num *100)]
-            for i in range(int(abs(octave))):
-                 if octave > 0:
-                        note_text += "'"
-                 else:
-                        note_text += ","
+            for _ in range(int(abs(octave))):
+                note_text += "'" if octave > 0 else ","
             dur = r[3]
             beat_start = fmod(r[2], num_beats)
             overshoot = fmod(beat_start + dur, num_beats)
@@ -202,15 +198,15 @@ def make_ly_text(rows, staff_name, quant, time, num_beats, p4):
                 ly_notes_text += note_text + str( int(4 * (1.0/ (num_beats - beat_start))) )
                 while overshoot > 0:
                     new_part_dur = overshoot if overshoot < num_beats else num_beats
-                    ly_notes_text += ' ~ ' + note_text + str( int(4 * (1.0/ (num_beats - new_part_dur))) )
+                    ly_notes_text += f' ~ {note_text}{int(4 * (1.0/ (num_beats - new_part_dur)))}'
                     overshoot = overshoot - new_part_dur
             else:
                 if modf(1.0/dur)[0] != 0:
-                    dur_text = str( int(8 * (1.0/dur)) ) + "."
+                    dur_text = f"{int(8 * (1.0/dur))}."
                 else:
                     dur_text = str( int(4 * (1.0/dur)) )
                 note_text += dur_text
-                ly_notes_text += note_text + ' '
+                ly_notes_text += f'{note_text} '
         ly_notes_text += '} \\\\'
     ly_notes_text += '\n>>}'
     return ly_notes_text

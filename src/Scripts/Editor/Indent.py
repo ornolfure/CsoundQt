@@ -6,11 +6,7 @@ import PythonQt.QtGui as pqt
 
 selection = q.getSelectedText()  # Get current selection
 # Careful, you must select a whole instrument block, or you will get strange indentation
-if selection == "": # If no selection
-    orcText = q.getOrc() # use complete orc section
-else:
-    orcText = selection
-
+orcText = q.getOrc() if selection == "" else selection
 orcLines = orcText.splitlines()  # split lines
 
 newOrcText = ""
@@ -19,7 +15,7 @@ newlevel = 0 # indentation level for following lines
 
 for line in orcLines:  # go through all the lines
     line = line.strip() # remove initial and trailing whitespace
-    
+
     if line.find("instr") == 0:
         level = 0
         newlevel = 1
@@ -44,7 +40,7 @@ if (q.getFileName().endswith('.csd')):
             'Selection has been indented')
     else:
         if selection[-1] != "\n":  # If selection doesn't end with line ending
-            newOrcText = newOrcText[0:-2] # Remove extra line ending
+            newOrcText = newOrcText[:-2]
         q.insertText(newOrcText)  # Peplaces the current selection
         pqt.QMessageBox.information(0, 'Indent script',
             'All document indented')

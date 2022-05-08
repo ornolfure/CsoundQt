@@ -13,10 +13,7 @@ if not ftable_text.startswith('f'):
     raise Exception('Please select ftable text')
 
 parts = ftable_text.split(' ')
-if parts[0] == 'f':
-    tabnum = abs(int(parts[1]))
-else:
-    tabnum = abs(int(parts[0][1:]))
+tabnum = abs(int(parts[1])) if parts[0] == 'f' else abs(int(parts[0][1:]))
 # create empty orchestra and score
 orc = ''' sr = 44100
 ksmps = 64
@@ -42,9 +39,7 @@ c.compile()
 c.PerformKsmps() # Must perform one control block to have tables created
 # There must be a better way to do this!
 len = c.TableLength(tabnum)
-tab = []
-for i in range(len):
-    tab.append(-c.TableGet(tabnum, i))
+tab = [-c.TableGet(tabnum, i) for i in range(len)]
 c.Stop()
 c.Cleanup()
 

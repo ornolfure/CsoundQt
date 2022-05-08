@@ -10,10 +10,6 @@ for c in cells:
     if type(c) != str and c > 0:
         new_val = 117 + (12 *log10(c/440.0)/log10(2))
         c = int(new_val/12) - 1 + ((new_val%12) / 100)
-        new_data.append(c)
-    else:
-        new_data.append(c)
-
-
+    new_data.append(c)
 # set output
 q.set_cells_by_row(new_data)
